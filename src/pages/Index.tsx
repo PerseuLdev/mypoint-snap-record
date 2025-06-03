@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Camera, Clock, MapPin, History, Settings, CheckCircle, AlertCircle } from 'lucide-react';
+import { Camera, Clock, MapPin, History, Settings, CheckCircle, AlertCircle, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,28 +21,81 @@ export interface TimeRecord {
   type: 'entrada' | 'saida';
 }
 
+interface Alarm {
+  id: string;
+  time: string;
+  type: 'saida_almoco' | 'volta_almoco';
+  enabled: boolean;
+  label: string;
+}
+
 const MyPointApp = () => {
   const [currentScreen, setCurrentScreen] = useState<'welcome' | 'main' | 'history' | 'settings'>('welcome');
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [locationStatus, setLocationStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [alarms, setAlarms] = useState<Alarm[]>([]);
   const { toast } = useToast();
 
-  // Simulate permission check and time updates
+  // Update time and check alarms
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(new Date());
+      const now = new Date();
+      setCurrentTime(now);
+      checkAlarms(now);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [alarms]);
 
-  // Load saved records from localStorage
+  // Load saved data from localStorage
   useEffect(() => {
     const savedRecords = localStorage.getItem('mypoint-records');
     if (savedRecords) {
       setTimeRecords(JSON.parse(savedRecords));
+    }
+
+    const savedAlarms = localStorage.getItem('mypoint-alarms');
+    if (savedAlarms) {
+      setAlarms(JSON.parse(savedAlarms));
+    }
+  }, []);
+
+  // Check if any alarm should trigger
+  const checkAlarms = (now: Date) => {
+    const currentTimeString = now.toTimeString().slice(0, 5); // HH:MM format
+    
+    alarms.forEach(alarm => {
+      if (alarm.enabled && alarm.time === currentTimeString) {
+        // Check if we already notified for this minute
+        const lastNotification = localStorage.getItem(`alarm-${alarm.id}-last`);
+        const currentMinute = now.getTime();
+        
+        if (!lastNotification || currentMinute - parseInt(lastNotification) > 60000) {
+          localStorage.setItem(`alarm-${alarm.id}-last`, currentMinute.toString());
+          
+          toast({
+            title: "⏰ Alarme de Ponto!",
+            description: `Hora do ${alarm.label.toLowerCase()}! Não se esqueça de registrar seu ponto.`,
+          });
+
+          // Show browser notification if permission granted
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification('MyPoint - Alarme', {
+              body: `Hora do ${alarm.label.toLowerCase()}! Registre seu ponto.`,
+              icon: '/favicon.ico'
+            });
+          }
+        }
+      }
+    });
+  };
+
+  // Request notification permission on app start
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
     }
   }, []);
 
@@ -107,8 +159,13 @@ const MyPointApp = () => {
             <Clock className="w-6 h-6" />
             <h1 className="text-xl font-bold">MyPoint</h1>
           </div>
-          <div className="text-sm">
-            {currentTime.toLocaleTimeString()}
+          <div className="flex items-center space-x-2">
+            {alarms.some(alarm => alarm.enabled) && (
+              <Bell className="w-4 h-4 text-yellow-300" />
+            )}
+            <div className="text-sm">
+              {currentTime.toLocaleTimeString()}
+            </div>
           </div>
         </div>
       </header>
@@ -181,6 +238,9 @@ const MyPointApp = () => {
           >
             <Settings className="w-6 h-6" />
             <span className="text-xs font-medium">Config</span>
+            {alarms.some(alarm => alarm.enabled) && (
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+            )}
           </button>
         </div>
       </nav>

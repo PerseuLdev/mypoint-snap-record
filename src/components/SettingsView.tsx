@@ -1,255 +1,183 @@
 
 import React, { useState } from 'react';
-import { Settings, Camera, MapPin, Shield, Info, Trash2, HelpCircle, Lock, Smartphone } from 'lucide-react';
+import { Settings, Trash2, Shield, Info, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import AlarmSettings from './AlarmSettings';
 
 interface SettingsViewProps {
   onClearHistory: () => void;
   recordsCount: number;
 }
 
-const SettingsView: React.FC<SettingsViewProps> = ({ onClearHistory, recordsCount }) => {
-  const [showAbout, setShowAbout] = useState(false);
-  const [showPermissions, setShowPermissions] = useState(false);
-  const { toast } = useToast();
+const SettingsView: React.FC<SettingsViewProps> = ({
+  onClearHistory,
+  recordsCount
+}) => {
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const handleRequestPermissions = () => {
-    toast({
-      title: "Permissões verificadas",
-      description: "Todas as permissões estão ativas e funcionando corretamente.",
-    });
+  const handleClearHistory = () => {
+    onClearHistory();
+    setShowClearConfirm(false);
   };
 
-  const permissions = [
-    {
-      icon: <Camera className="w-5 h-5" />,
-      name: "Câmera",
-      description: "Necessária para capturar fotos dos registros",
-      status: "granted" as const
-    },
-    {
-      icon: <MapPin className="w-5 h-5" />,
-      name: "Localização",
-      description: "Necessária para registrar onde o ponto foi batido",
-      status: "granted" as const
-    },
-    {
-      icon: <Shield className="w-5 h-5" />,
-      name: "Armazenamento",
-      description: "Necessária para salvar os registros no dispositivo",
-      status: "granted" as const
-    }
-  ];
+  const requestPermissions = async () => {
+    // Simulate permission request
+    alert('Verificando permissões...\n\n✅ Câmera: Concedida\n✅ Localização: Concedida\n✅ Armazenamento: Concedido');
+  };
 
   return (
     <div className="p-4 space-y-4 pb-24">
-      {/* Header */}
-      <div>
+      <div className="flex items-center space-x-2 mb-6">
+        <Settings className="w-6 h-6 text-blue-700" />
         <h2 className="text-xl font-bold text-gray-800">Configurações</h2>
-        <p className="text-sm text-gray-600">Gerencie suas preferências e dados</p>
       </div>
 
-      {/* App Status */}
-      <Card className="bg-green-50 border-green-200">
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <Lock className="w-5 h-5 text-green-600" />
+      {/* Alarm Settings */}
+      <AlarmSettings />
+
+      {/* Permissions Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Shield className="w-5 h-5" />
+            <span>Permissões</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Status das Permissões</p>
+              <p className="text-sm text-gray-600">Verificar e solicitar permissões necessárias</p>
             </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-green-800">App funcionando normalmente</h3>
-              <p className="text-sm text-green-600">
-                Todos os dados estão seguros no seu dispositivo
-              </p>
+            <Button variant="outline" onClick={requestPermissions}>
+              Verificar
+            </Button>
+          </div>
+          
+          <div className="space-y-2 pt-2 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Câmera</span>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativa</Badge>
             </div>
-            <Badge className="bg-green-100 text-green-800">
-              {recordsCount} registros
-            </Badge>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Localização</span>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativa</Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Armazenamento</span>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativo</Badge>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-gray-800">Ações Rápidas</h3>
-        
-        <Card>
-          <CardContent className="p-0">
-            <button
-              onClick={() => setShowPermissions(true)}
-              className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Settings className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-800">Verificar Permissões</h4>
-                  <p className="text-sm text-gray-600">Revisar e ajustar permissões do app</p>
-                </div>
-              </div>
-            </button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-0">
-            <button
-              onClick={() => setShowAbout(true)}
-              className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Info className="w-5 h-5 text-purple-600" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-800">Sobre o MyPoint</h4>
-                  <p className="text-sm text-gray-600">Informações sobre o aplicativo</p>
-                </div>
-              </div>
-            </button>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Data Management */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-gray-800">Gerenciar Dados</h3>
-        
-        <Card className="border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-600" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-800">Limpar Histórico</h4>
-                <p className="text-sm text-gray-600">
-                  Remove todos os registros salvos (não pode ser desfeito)
-                </p>
-              </div>
-              <Button
-                onClick={onClearHistory}
-                variant="outline"
-                size="sm"
-                className="text-red-600 border-red-200 hover:bg-red-50"
-                disabled={recordsCount === 0}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Trash2 className="w-5 h-5" />
+            <span>Gerenciar Dados</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Histórico de Registros</p>
+              <p className="text-sm text-gray-600">
+                {recordsCount > 0 
+                  ? `${recordsCount} registro${recordsCount !== 1 ? 's' : ''} armazenado${recordsCount !== 1 ? 's' : ''} localmente`
+                  : 'Nenhum registro encontrado'
+                }
+              </p>
+            </div>
+            {recordsCount > 0 && (
+              <Button 
+                variant="destructive" 
+                onClick={() => setShowClearConfirm(true)}
               >
                 Limpar
               </Button>
+            )}
+          </div>
+
+          {showClearConfirm && (
+            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+              <p className="text-sm text-red-800 mb-3">
+                Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex space-x-2">
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  onClick={handleClearHistory}
+                >
+                  Confirmar
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={() => setShowClearConfirm(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* App Info */}
-      <Card className="bg-gray-50">
-        <CardContent className="p-4">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-              <Smartphone className="w-6 h-6 text-blue-600" />
-            </div>
-            <h3 className="font-medium text-gray-800">MyPoint</h3>
-            <p className="text-sm text-gray-600">Versão 1.0.0 (MVP)</p>
-            <p className="text-xs text-gray-500">
-              Registre seu ponto com segurança e praticidade
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Info className="w-5 h-5" />
+            <span>Sobre o App</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <p className="font-medium">MyPoint v1.0.0</p>
+            <p className="text-sm text-gray-600">
+              Registre seu ponto de forma segura com foto, timestamp e geolocalização.
             </p>
+          </div>
+          
+          <div className="pt-2 border-t space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Armazenamento</span>
+              <span className="text-sm text-gray-600">Local</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Câmera</span>
+              <span className="text-sm text-gray-600">Traseira</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Backup</span>
+              <span className="text-sm text-gray-600">Manual</span>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Permissions Dialog */}
-      <Dialog open={showPermissions} onOpenChange={setShowPermissions}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Settings className="w-5 h-5" />
-              <span>Permissões do App</span>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              O MyPoint precisa das seguintes permissões para funcionar:
-            </p>
-            
-            <div className="space-y-3">
-              {permissions.map((permission, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="p-2 bg-white rounded-lg">
-                    {permission.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-800">{permission.name}</h4>
-                      <Badge className="bg-green-100 text-green-800">Ativa</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">{permission.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <Button
-              onClick={handleRequestPermissions}
-              className="w-full bg-blue-700 hover:bg-blue-800"
-            >
-              Verificar Permissões
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* About Dialog */}
-      <Dialog open={showAbout} onOpenChange={setShowAbout}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Info className="w-5 h-5" />
-              <span>Sobre o MyPoint</span>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Smartphone className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-800">MyPoint</h3>
-              <p className="text-gray-600">Versão 1.0.0 (MVP)</p>
-            </div>
-            
-            <div className="space-y-3 text-sm text-gray-600">
-              <p>
-                O MyPoint permite que você registre seu ponto de forma segura usando 
-                fotos com timestamp e geolocalização.
+      {/* Privacy Notice */}
+      <Card className="bg-blue-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-start space-x-3">
+            <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-blue-800">
+                Privacidade e Segurança
               </p>
-              
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <h4 className="font-medium text-blue-800 mb-2">🔒 Privacidade e Segurança</h4>
-                <ul className="space-y-1 text-blue-700">
-                  <li>• Todos os dados ficam apenas no seu dispositivo</li>
-                  <li>• Nenhuma informação é enviada para a internet</li>
-                  <li>• Você tem controle total sobre seus registros</li>
-                </ul>
-              </div>
-              
-              <div className="bg-green-50 p-3 rounded-lg">
-                <h4 className="font-medium text-green-800 mb-2">✨ Funcionalidades</h4>
-                <ul className="space-y-1 text-green-700">
-                  <li>• Registro com foto, data/hora e localização</li>
-                  <li>• Histórico completo com filtros</li>
-                  <li>• Interface simples e intuitiva</li>
-                </ul>
-              </div>
+              <p className="text-xs text-blue-600 mt-1">
+                Todos os seus dados são armazenados localmente no seu dispositivo. 
+                Nenhuma informação é enviada para servidores externos.
+              </p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle } from 'lucide-react';
+import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,13 +22,13 @@ const CameraView: React.FC<CameraViewProps> = ({
   const [lastCaptureTime, setLastCaptureTime] = useState<Date | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Simulate camera functionality
+  // Simulate camera functionality with rear camera
   const handleCapture = async () => {
     setIsCapturing(true);
     
     // Simulate photo capture delay
     setTimeout(() => {
-      // Generate a placeholder image (in real app, this would be the actual photo)
+      // Generate a placeholder image simulating a receipt/document photo
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
@@ -36,25 +36,31 @@ const CameraView: React.FC<CameraViewProps> = ({
       canvas.height = 480;
       
       if (ctx) {
-        // Create a gradient background
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, '#e0f2fe');
-        gradient.addColorStop(1, '#0369a1');
-        
-        ctx.fillStyle = gradient;
+        // Create a more realistic document background
+        ctx.fillStyle = '#f8f9fa';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Add timestamp overlay
-        ctx.fillStyle = 'white';
-        ctx.font = '24px Arial';
-        ctx.fillText(`Registro: ${currentTime.toLocaleString()}`, 20, 50);
-        ctx.fillText(`Localização: Confirmada`, 20, 80);
+        // Simulate a document/receipt
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(50, 100, 540, 280);
+        ctx.strokeStyle = '#dee2e6';
+        ctx.strokeRect(50, 100, 540, 280);
         
-        // Add a simulated person silhouette
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.beginPath();
-        ctx.arc(320, 200, 80, 0, 2 * Math.PI);
-        ctx.fill();
+        // Add document content simulation
+        ctx.fillStyle = '#212529';
+        ctx.font = '16px Arial';
+        ctx.fillText('COMPROVANTE DE PONTO', 70, 130);
+        ctx.font = '14px Arial';
+        ctx.fillText(`Data: ${currentTime.toLocaleDateString()}`, 70, 160);
+        ctx.fillText(`Horário: ${currentTime.toLocaleTimeString()}`, 70, 180);
+        ctx.fillText('Localização: Confirmada', 70, 200);
+        
+        // Add timestamp overlay (as if taken by rear camera)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, 30);
+        ctx.fillStyle = 'white';
+        ctx.font = '14px Arial';
+        ctx.fillText(`📸 ${currentTime.toLocaleString()} - Câmera Traseira`, 10, 20);
       }
       
       const photoData = canvas.toDataURL('image/jpeg', 0.8);
@@ -138,18 +144,36 @@ const CameraView: React.FC<CameraViewProps> = ({
         </Card>
       </div>
 
-      {/* Camera Preview */}
+      {/* Instruction Card */}
+      <Card className="bg-yellow-50 border-yellow-200">
+        <CardContent className="p-3">
+          <div className="flex items-center space-x-2">
+            <FileText className="w-4 h-4 text-yellow-600" />
+            <div>
+              <p className="text-sm font-medium text-yellow-800">
+                Fotografe o comprovante de ponto
+              </p>
+              <p className="text-xs text-yellow-600">
+                Use a câmera traseira para melhor qualidade
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Camera Preview - Rear Camera */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           <div className="relative bg-gradient-to-br from-gray-200 to-gray-400 aspect-[4/3] flex items-center justify-center">
-            {/* Simulated camera preview */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-blue-300 opacity-50"></div>
+            {/* Simulated rear camera preview */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-300 opacity-50"></div>
             
             {/* Camera overlay */}
             <div className="relative z-10 text-center">
               <Camera className="w-16 h-16 text-gray-600 mx-auto mb-2" />
-              <p className="text-gray-700 font-medium">Visualização da Câmera</p>
-              <p className="text-sm text-gray-600">Posicione-se no centro da tela</p>
+              <p className="text-gray-700 font-medium">Câmera Traseira Ativa</p>
+              <p className="text-sm text-gray-600">Posicione o comprovante no centro</p>
+              <p className="text-xs text-gray-500 mt-1">📱 Segure firme para melhor foco</p>
             </div>
 
             {/* Timestamp overlay */}
@@ -157,14 +181,18 @@ const CameraView: React.FC<CameraViewProps> = ({
               {currentTime.toLocaleString()}
             </div>
 
-            {/* Location overlay */}
+            {/* Camera type indicator */}
             <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
-              <MapPin className="w-3 h-3" />
-              <span>SP</span>
+              <Camera className="w-3 h-3" />
+              <span>Traseira</span>
             </div>
 
-            {/* Frame guide */}
-            <div className="absolute inset-8 border-2 border-white border-dashed rounded-lg opacity-50"></div>
+            {/* Document frame guide */}
+            <div className="absolute inset-8 border-2 border-white border-dashed rounded-lg opacity-70">
+              <div className="absolute top-2 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+                📄 Comprovante aqui
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -205,7 +233,7 @@ const CameraView: React.FC<CameraViewProps> = ({
               <Camera className="w-8 h-8 mx-auto mb-2" />
             )}
             <span className="text-sm font-bold">
-              {isCapturing ? 'Registrando...' : 'REGISTRAR'}
+              {isCapturing ? 'Fotografando...' : 'FOTOGRAFAR'}
             </span>
           </div>
         </Button>
@@ -219,7 +247,7 @@ const CameraView: React.FC<CameraViewProps> = ({
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-green-800">
-                  Último registro realizado com sucesso!
+                  Comprovante fotografado com sucesso!
                 </p>
                 <p className="text-xs text-green-600">
                   {lastCaptureTime.toLocaleString()}
