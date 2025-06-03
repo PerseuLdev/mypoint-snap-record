@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle, FileText, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -88,9 +87,9 @@ const CameraView: React.FC<CameraViewProps> = ({
   const getLocationStatusIcon = () => {
     switch (locationStatus) {
       case 'loading':
-        return <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent" />;
+        return <div className="animate-spin rounded-full h-4 w-4 border-2 border-amber-500 border-t-transparent" />;
       case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
+        return <CheckCircle className="w-4 h-4 text-emerald-600" />;
       case 'error':
         return <AlertTriangle className="w-4 h-4 text-red-600" />;
     }
@@ -109,24 +108,23 @@ const CameraView: React.FC<CameraViewProps> = ({
 
   const getTimerColor = () => {
     if (timeRemaining === 'Vencido') return 'text-red-800 bg-red-50 border-red-200';
-    if (timeRemaining === 'Concluído') return 'text-green-800 bg-green-50 border-green-200';
-    return 'text-blue-800 bg-blue-50 border-blue-200';
+    return 'text-indigo-800 bg-indigo-50 border-indigo-200';
   };
 
   return (
     <div className="p-4 space-y-4 pb-24">
       {/* Status Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className={workdayStarted ? getTimerColor() : 'bg-gray-50 border-gray-200'}>
+        <Card className={workdayStarted ? getTimerColor() : 'bg-slate-50 border-slate-200'}>
           <CardContent className="p-3">
             <div className="flex items-center space-x-2">
-              <Timer className={`w-4 h-4 ${workdayStarted ? '' : 'text-gray-600'}`} />
+              <Timer className={`w-4 h-4 ${workdayStarted ? '' : 'text-slate-600'}`} />
               <div>
-                <p className={`text-xs font-medium ${workdayStarted ? '' : 'text-gray-600'}`}>
+                <p className={`text-xs font-medium ${workdayStarted ? '' : 'text-slate-600'}`}>
                   {workdayStarted ? 'Tempo Restante' : 'Jornada'}
                 </p>
-                <p className={`text-sm font-bold ${workdayStarted ? '' : 'text-gray-600'}`}>
-                  {workdayStarted ? timeRemaining : 'Não iniciada'}
+                <p className={`text-sm font-bold ${workdayStarted ? '' : 'text-slate-600'}`}>
+                  {workdayStarted ? timeRemaining : 'Aguardando entrada'}
                 </p>
               </div>
             </div>
@@ -134,25 +132,25 @@ const CameraView: React.FC<CameraViewProps> = ({
         </Card>
 
         <Card className={`${
-          locationStatus === 'success' ? 'bg-green-50 border-green-200' :
+          locationStatus === 'success' ? 'bg-emerald-50 border-emerald-200' :
           locationStatus === 'error' ? 'bg-red-50 border-red-200' :
-          'bg-orange-50 border-orange-200'
+          'bg-amber-50 border-amber-200'
         }`}>
           <CardContent className="p-3">
             <div className="flex items-center space-x-2">
               {getLocationStatusIcon()}
               <div>
                 <p className={`text-xs font-medium ${
-                  locationStatus === 'success' ? 'text-green-600' :
+                  locationStatus === 'success' ? 'text-emerald-600' :
                   locationStatus === 'error' ? 'text-red-600' :
-                  'text-orange-600'
+                  'text-amber-600'
                 }`}>
                   GPS
                 </p>
                 <p className={`text-sm font-bold ${
-                  locationStatus === 'success' ? 'text-green-800' :
+                  locationStatus === 'success' ? 'text-emerald-800' :
                   locationStatus === 'error' ? 'text-red-800' :
-                  'text-orange-800'
+                  'text-amber-800'
                 }`}>
                   {getLocationStatusText()}
                 </p>
@@ -162,82 +160,46 @@ const CameraView: React.FC<CameraViewProps> = ({
         </Card>
       </div>
 
-      {/* Current Time Card */}
-      <Card className="bg-slate-50 border-slate-200">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-slate-600" />
-              <span className="text-sm font-medium text-slate-600">Agora</span>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-slate-800">
-                {currentTime.toLocaleTimeString()}
-              </p>
-              <p className="text-xs text-slate-600">
-                {currentTime.toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Instruction Card */}
-      <Card className="bg-yellow-50 border-yellow-200">
+      <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200">
         <CardContent className="p-3">
           <div className="flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-yellow-600" />
+            <FileText className="w-4 h-4 text-indigo-600" />
             <div>
-              <p className="text-sm font-medium text-yellow-800">
+              <p className="text-sm font-medium text-indigo-800">
                 Fotografe o comprovante de ponto
               </p>
-              <p className="text-xs text-yellow-600">
-                Use a câmera traseira para melhor qualidade
+              <p className="text-xs text-indigo-600">
+                Posicione o documento no centro da tela
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Camera Preview - Rear Camera */}
+      {/* Camera Preview - Clean design */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="relative bg-gradient-to-br from-gray-200 to-gray-400 aspect-[4/3] flex items-center justify-center">
-            {/* Simulated rear camera preview */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-300 opacity-50"></div>
+          <div className="relative bg-gradient-to-br from-slate-200 to-slate-400 aspect-[4/3] flex items-center justify-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-300 opacity-50"></div>
             
-            {/* Camera overlay */}
             <div className="relative z-10 text-center">
-              <Camera className="w-16 h-16 text-gray-600 mx-auto mb-2" />
-              <p className="text-gray-700 font-medium">Câmera Traseira Ativa</p>
-              <p className="text-sm text-gray-600">Posicione o comprovante no centro</p>
-              <p className="text-xs text-gray-500 mt-1">📱 Segure firme para melhor foco</p>
+              <Camera className="w-16 h-16 text-slate-600 mx-auto mb-2" />
+              <p className="text-slate-700 font-medium">Câmera Ativa</p>
+              <p className="text-sm text-slate-600">Posicione o comprovante no centro</p>
             </div>
 
-            {/* Document frame guide - adjusted position to not overlap with overlays */}
-            <div className="absolute top-8 left-8 right-8 bottom-16 border-2 border-white border-dashed rounded-lg opacity-70">
+            <div className="absolute top-8 left-8 right-8 bottom-8 border-2 border-white border-dashed rounded-lg opacity-70">
               <div className="absolute -top-6 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
                 📄 Comprovante aqui
               </div>
-            </div>
-
-            {/* Timestamp overlay - moved to bottom left, better positioned */}
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-              <div>{currentTime.toLocaleDateString()}</div>
-              <div>{currentTime.toLocaleTimeString()}</div>
-            </div>
-
-            {/* Camera type indicator - moved to bottom right, better positioned */}
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs flex items-center space-x-1">
-              <Camera className="w-3 h-3" />
-              <span>Traseira</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Next Record Type */}
-      <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <Card className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -261,7 +223,7 @@ const CameraView: React.FC<CameraViewProps> = ({
         <Button
           onClick={handleCapture}
           disabled={isCapturing || locationStatus === 'loading'}
-          className={`w-32 h-32 rounded-full bg-blue-700 hover:bg-blue-800 disabled:bg-gray-400 transition-all duration-200 ${
+          className={`w-32 h-32 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 transition-all duration-200 ${
             isCapturing ? 'scale-95' : 'hover:scale-105'
           }`}
         >
@@ -280,15 +242,15 @@ const CameraView: React.FC<CameraViewProps> = ({
 
       {/* Last capture feedback */}
       {lastCaptureTime && !isCapturing && (
-        <Card className="bg-green-50 border-green-200">
+        <Card className="bg-emerald-50 border-emerald-200">
           <CardContent className="p-3">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+              <CheckCircle className="w-5 h-5 text-emerald-600" />
               <div>
-                <p className="text-sm font-medium text-green-800">
+                <p className="text-sm font-medium text-emerald-800">
                   Comprovante fotografado com sucesso!
                 </p>
-                <p className="text-xs text-green-600">
+                <p className="text-xs text-emerald-600">
                   {lastCaptureTime.toLocaleString()}
                 </p>
               </div>

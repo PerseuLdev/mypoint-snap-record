@@ -19,7 +19,6 @@ export const useWorkdayTimer = (timeRecords: TimeRecord[]) => {
 
   useEffect(() => {
     const updateTimer = () => {
-      // Load config from localStorage
       const savedConfig = localStorage.getItem('mypoint-workday-config');
       const config: WorkdayConfig = savedConfig ? JSON.parse(savedConfig) : {
         workHours: 8,
@@ -30,13 +29,11 @@ export const useWorkdayTimer = (timeRecords: TimeRecord[]) => {
       const today = new Date();
       const todayStr = today.toDateString();
       
-      // Get today's records
       const todayRecords = timeRecords.filter(record => {
         const recordDate = new Date(record.timestamp);
         return recordDate.toDateString() === todayStr;
       });
 
-      // Find the first entry of the day
       const firstEntry = todayRecords
         .filter(record => record.type === 'entrada')
         .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())[0];
@@ -47,7 +44,6 @@ export const useWorkdayTimer = (timeRecords: TimeRecord[]) => {
         return;
       }
 
-      // Check if user has already clocked out
       const entryTime = new Date(firstEntry.timestamp);
       const hasExitToday = todayRecords.some(record => 
         record.type === 'saida' && 
@@ -55,8 +51,8 @@ export const useWorkdayTimer = (timeRecords: TimeRecord[]) => {
       );
 
       if (hasExitToday) {
-        setTimeRemaining('Concluído');
-        setWorkdayStarted(true);
+        setTimeRemaining('--:--');
+        setWorkdayStarted(false);
         return;
       }
 
@@ -78,10 +74,7 @@ export const useWorkdayTimer = (timeRecords: TimeRecord[]) => {
       setWorkdayStarted(true);
     };
 
-    // Update immediately
     updateTimer();
-    
-    // Update every minute
     const interval = setInterval(updateTimer, 60000);
     
     return () => clearInterval(interval);

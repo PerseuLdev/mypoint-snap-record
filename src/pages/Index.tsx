@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Clock, MapPin, History, Settings, CheckCircle, AlertCircle, Bell } from 'lucide-react';
+import { Camera, Clock, MapPin, History, User, CheckCircle, AlertCircle, Bell, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import CameraView from '@/components/CameraView';
 import HistoryView from '@/components/HistoryView';
-import SettingsView from '@/components/SettingsView';
+import ScheduleView from '@/components/ScheduleView';
+import ProfileView from '@/components/ProfileView';
 import { useToast } from '@/hooks/use-toast';
 import { useWorkdayReminder } from '@/hooks/useWorkdayReminder';
 
@@ -31,7 +32,7 @@ interface Alarm {
 }
 
 const MyPointApp = () => {
-  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'main' | 'history' | 'settings'>('welcome');
+  const [currentScreen, setCurrentScreen] = useState<'welcome' | 'main' | 'history' | 'schedule' | 'profile'>('welcome');
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -155,21 +156,31 @@ const MyPointApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-blue-700 text-white p-4 shadow-lg">
+      <header className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4 shadow-lg">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Clock className="w-6 h-6" />
-            <h1 className="text-xl font-bold">MyPoint</h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            {alarms.some(alarm => alarm.enabled) && (
-              <Bell className="w-4 h-4 text-yellow-300" />
-            )}
-            <div className="text-sm">
-              {currentTime.toLocaleTimeString()}
+          <div className="flex items-center space-x-3">
+            <div className="bg-white bg-opacity-20 p-2 rounded-lg">
+              <Clock className="w-6 h-6" />
             </div>
+            <div>
+              <h1 className="text-xl font-bold">MyPoint</h1>
+              <p className="text-xs text-indigo-100">Controle de Ponto Inteligente</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            {alarms.some(alarm => alarm.enabled) && (
+              <Bell className="w-4 h-4 text-amber-300" />
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setCurrentScreen('profile')}
+              className="text-white hover:bg-white hover:bg-opacity-20"
+            >
+              <User className="w-5 h-5" />
+            </Button>
           </div>
         </div>
       </header>
@@ -193,10 +204,15 @@ const MyPointApp = () => {
           />
         )}
 
-        {currentScreen === 'settings' && (
-          <SettingsView 
+        {currentScreen === 'schedule' && (
+          <ScheduleView onBack={() => setCurrentScreen('main')} />
+        )}
+
+        {currentScreen === 'profile' && (
+          <ProfileView 
             onClearHistory={clearHistory}
             recordsCount={timeRecords.length}
+            onBack={() => setCurrentScreen('main')}
           />
         )}
       </main>
@@ -208,8 +224,8 @@ const MyPointApp = () => {
             onClick={() => setCurrentScreen('main')}
             className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
               currentScreen === 'main' 
-                ? 'text-blue-700 bg-blue-50' 
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-indigo-600 bg-indigo-50' 
+                : 'text-slate-600 hover:text-slate-800'
             }`}
           >
             <Camera className="w-6 h-6" />
@@ -220,31 +236,31 @@ const MyPointApp = () => {
             onClick={() => setCurrentScreen('history')}
             className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
               currentScreen === 'history' 
-                ? 'text-blue-700 bg-blue-50' 
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-indigo-600 bg-indigo-50' 
+                : 'text-slate-600 hover:text-slate-800'
             }`}
           >
             <History className="w-6 h-6" />
             <span className="text-xs font-medium">Histórico</span>
             {timeRecords.length > 0 && (
-              <Badge variant="secondary" className="text-xs px-1 py-0">
+              <Badge variant="secondary" className="text-xs px-1 py-0 bg-indigo-100 text-indigo-700">
                 {timeRecords.length}
               </Badge>
             )}
           </button>
           
           <button
-            onClick={() => setCurrentScreen('settings')}
+            onClick={() => setCurrentScreen('schedule')}
             className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
-              currentScreen === 'settings' 
-                ? 'text-blue-700 bg-blue-50' 
-                : 'text-gray-600 hover:text-gray-800'
+              currentScreen === 'schedule' 
+                ? 'text-indigo-600 bg-indigo-50' 
+                : 'text-slate-600 hover:text-slate-800'
             }`}
           >
-            <Settings className="w-6 h-6" />
-            <span className="text-xs font-medium">Config</span>
+            <Clock className="w-6 h-6" />
+            <span className="text-xs font-medium">Horários</span>
             {alarms.some(alarm => alarm.enabled) && (
-              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
             )}
           </button>
         </div>
