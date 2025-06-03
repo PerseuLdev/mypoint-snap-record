@@ -214,22 +214,23 @@ const CameraView: React.FC<CameraViewProps> = ({
               <p className="text-xs text-gray-500 mt-1">📱 Segure firme para melhor foco</p>
             </div>
 
-            {/* Timestamp overlay - moved to bottom */}
-            <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
-              {currentTime.toLocaleString()}
-            </div>
-
-            {/* Camera type indicator - moved to bottom right */}
-            <div className="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
-              <Camera className="w-3 h-3" />
-              <span>Traseira</span>
-            </div>
-
-            {/* Document frame guide - adjusted position */}
-            <div className="absolute inset-12 border-2 border-white border-dashed rounded-lg opacity-70">
+            {/* Document frame guide - adjusted position to not overlap with overlays */}
+            <div className="absolute top-8 left-8 right-8 bottom-16 border-2 border-white border-dashed rounded-lg opacity-70">
               <div className="absolute -top-6 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
                 📄 Comprovante aqui
               </div>
+            </div>
+
+            {/* Timestamp overlay - moved to bottom left, better positioned */}
+            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+              <div>{currentTime.toLocaleDateString()}</div>
+              <div>{currentTime.toLocaleTimeString()}</div>
+            </div>
+
+            {/* Camera type indicator - moved to bottom right, better positioned */}
+            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs flex items-center space-x-1">
+              <Camera className="w-3 h-3" />
+              <span>Traseira</span>
             </div>
           </div>
         </CardContent>
@@ -292,7 +293,7 @@ const CameraView: React.FC<CameraViewProps> = ({
                 </p>
               </div>
             </div>
-          </div>
+          </CardContent>
         </Card>
       )}
     </div>
