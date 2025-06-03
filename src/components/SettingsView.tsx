@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import AlarmSettings from './AlarmSettings';
+import WorkdaySettings from './WorkdaySettings';
 
 interface SettingsViewProps {
   onClearHistory: () => void;
@@ -33,6 +34,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({
         <Settings className="w-6 h-6 text-blue-700" />
         <h2 className="text-xl font-bold text-gray-800">Configurações</h2>
       </div>
+
+      {/* Workday Settings */}
+      <WorkdaySettings />
 
       {/* Alarm Settings */}
       <AlarmSettings />

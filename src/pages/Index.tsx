@@ -8,6 +8,7 @@ import CameraView from '@/components/CameraView';
 import HistoryView from '@/components/HistoryView';
 import SettingsView from '@/components/SettingsView';
 import { useToast } from '@/hooks/use-toast';
+import { useWorkdayReminder } from '@/hooks/useWorkdayReminder';
 
 export interface TimeRecord {
   id: string;
@@ -37,6 +38,9 @@ const MyPointApp = () => {
   const [locationStatus, setLocationStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const { toast } = useToast();
+
+  // Use workday reminder hook
+  useWorkdayReminder(timeRecords);
 
   // Update time and check alarms
   useEffect(() => {
