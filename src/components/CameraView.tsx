@@ -1,26 +1,36 @@
 
 import React, { useState, useRef } from 'react';
-import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle, FileText } from 'lucide-react';
+import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle, FileText, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useWorkdayTimer } from '@/hooks/useWorkdayTimer';
+
+interface TimeRecord {
+  id: string;
+  timestamp: string;
+  type: 'entrada' | 'saida';
+}
 
 interface CameraViewProps {
   onPhotoCapture: (photoData: string) => void;
   currentTime: Date;
   locationStatus: 'loading' | 'success' | 'error';
   recordsCount: number;
+  timeRecords: TimeRecord[];
 }
 
 const CameraView: React.FC<CameraViewProps> = ({
   onPhotoCapture,
   currentTime,
   locationStatus,
-  recordsCount
+  recordsCount,
+  timeRecords
 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [lastCaptureTime, setLastCaptureTime] = useState<Date | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { timeRemaining, workdayStarted } = useWorkdayTimer(timeRecords);
 
   // Simulate camera functionality with rear camera
   const handleCapture = async () => {
@@ -97,18 +107,26 @@ const CameraView: React.FC<CameraViewProps> = ({
     }
   };
 
+  const getTimerColor = () => {
+    if (timeRemaining === 'Vencido') return 'text-red-800 bg-red-50 border-red-200';
+    if (timeRemaining === 'Concluído') return 'text-green-800 bg-green-50 border-green-200';
+    return 'text-blue-800 bg-blue-50 border-blue-200';
+  };
+
   return (
     <div className="p-4 space-y-4 pb-24">
       {/* Status Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className={workdayStarted ? getTimerColor() : 'bg-gray-50 border-gray-200'}>
           <CardContent className="p-3">
             <div className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-blue-600" />
+              <Timer className={`w-4 h-4 ${workdayStarted ? '' : 'text-gray-600'}`} />
               <div>
-                <p className="text-xs text-blue-600 font-medium">Agora</p>
-                <p className="text-sm font-bold text-blue-800">
-                  {currentTime.toLocaleTimeString()}
+                <p className={`text-xs font-medium ${workdayStarted ? '' : 'text-gray-600'}`}>
+                  {workdayStarted ? 'Tempo Restante' : 'Jornada'}
+                </p>
+                <p className={`text-sm font-bold ${workdayStarted ? '' : 'text-gray-600'}`}>
+                  {workdayStarted ? timeRemaining : 'Não iniciada'}
                 </p>
               </div>
             </div>
@@ -144,6 +162,26 @@ const CameraView: React.FC<CameraViewProps> = ({
         </Card>
       </div>
 
+      {/* Current Time Card */}
+      <Card className="bg-slate-50 border-slate-200">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-slate-600" />
+              <span className="text-sm font-medium text-slate-600">Agora</span>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-slate-800">
+                {currentTime.toLocaleTimeString()}
+              </p>
+              <p className="text-xs text-slate-600">
+                {currentTime.toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Instruction Card */}
       <Card className="bg-yellow-50 border-yellow-200">
         <CardContent className="p-3">
@@ -176,20 +214,20 @@ const CameraView: React.FC<CameraViewProps> = ({
               <p className="text-xs text-gray-500 mt-1">📱 Segure firme para melhor foco</p>
             </div>
 
-            {/* Timestamp overlay */}
-            <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+            {/* Timestamp overlay - moved to bottom */}
+            <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
               {currentTime.toLocaleString()}
             </div>
 
-            {/* Camera type indicator */}
-            <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
+            {/* Camera type indicator - moved to bottom right */}
+            <div className="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
               <Camera className="w-3 h-3" />
               <span>Traseira</span>
             </div>
 
-            {/* Document frame guide */}
-            <div className="absolute inset-8 border-2 border-white border-dashed rounded-lg opacity-70">
-              <div className="absolute top-2 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+            {/* Document frame guide - adjusted position */}
+            <div className="absolute inset-12 border-2 border-white border-dashed rounded-lg opacity-70">
+              <div className="absolute -top-6 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
                 📄 Comprovante aqui
               </div>
             </div>
@@ -254,7 +292,7 @@ const CameraView: React.FC<CameraViewProps> = ({
                 </p>
               </div>
             </div>
-          </CardContent>
+          </div>
         </Card>
       )}
     </div>

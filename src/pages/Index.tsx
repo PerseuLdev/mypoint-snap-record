@@ -182,6 +182,7 @@ const MyPointApp = () => {
             currentTime={currentTime}
             locationStatus={locationStatus}
             recordsCount={timeRecords.length}
+            timeRecords={timeRecords}
           />
         )}
 

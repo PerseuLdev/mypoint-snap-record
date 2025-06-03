@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { Settings, Trash2, Shield, Info, Bell } from 'lucide-react';
+import { Settings, Trash2, Shield, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AlarmSettings from './AlarmSettings';
 import WorkdaySettings from './WorkdaySettings';
 
@@ -35,11 +36,21 @@ const SettingsView: React.FC<SettingsViewProps> = ({
         <h2 className="text-xl font-bold text-gray-800">Configurações</h2>
       </div>
 
-      {/* Workday Settings */}
-      <WorkdaySettings />
-
-      {/* Alarm Settings */}
-      <AlarmSettings />
+      {/* Workday and Alarm Settings Tabs */}
+      <Tabs defaultValue="workday" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="workday">Jornada</TabsTrigger>
+          <TabsTrigger value="alarms">Alarmes</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="workday" className="mt-4">
+          <WorkdaySettings />
+        </TabsContent>
+        
+        <TabsContent value="alarms" className="mt-4">
+          <AlarmSettings />
+        </TabsContent>
+      </Tabs>
 
       {/* Permissions Card */}
       <Card>
