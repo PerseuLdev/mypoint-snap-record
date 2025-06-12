@@ -13,28 +13,45 @@ interface AdvancedPreferencesViewProps {
   onExportData: () => void;
 }
 
+const defaultPreferences: AppPreferences = {
+  theme: 'dark',
+  defaultCamera: 'back',
+  permissions: {
+    camera: false,
+    location: false,
+    notifications: false
+  },
+  workdayNotifications: true,
+  hasCompletedOnboarding: true,
+  language: 'pt-BR'
+};
+
 const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
   onBack,
   onExportData
 }) => {
-  const [preferences, setPreferences] = useState<AppPreferences>({
-    theme: 'dark',
-    defaultCamera: 'back',
-    permissions: {
-      camera: false,
-      location: false,
-      notifications: false
-    },
-    workdayNotifications: true,
-    hasCompletedOnboarding: true,
-    language: 'pt-BR'
-  });
+  const [preferences, setPreferences] = useState<AppPreferences>(defaultPreferences);
   const { toast } = useToast();
 
   useEffect(() => {
     const savedPrefs = localStorage.getItem('mypoint-preferences');
     if (savedPrefs) {
-      setPreferences(JSON.parse(savedPrefs));
+      try {
+        const parsed = JSON.parse(savedPrefs);
+        // Ensure permissions object exists
+        const mergedPrefs = {
+          ...defaultPreferences,
+          ...parsed,
+          permissions: {
+            ...defaultPreferences.permissions,
+            ...(parsed.permissions || {})
+          }
+        };
+        setPreferences(mergedPrefs);
+      } catch (error) {
+        console.error('Error parsing preferences:', error);
+        setPreferences(defaultPreferences);
+      }
     }
   }, []);
 
@@ -138,6 +155,11 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
       description: "A tela de boas-vindas aparecerá na próxima abertura do app.",
     });
   };
+
+  // Ensure permissions object exists before rendering
+  if (!preferences.permissions) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
