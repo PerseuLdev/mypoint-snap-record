@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Settings, Sun, Moon, Monitor, Camera, MapPin, Bell, ArrowLeft, Download, Save, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/hooks/useTheme';
 import { AppPreferences } from '@/types';
 
 interface AdvancedPreferencesViewProps {
@@ -14,7 +14,7 @@ interface AdvancedPreferencesViewProps {
 }
 
 const defaultPreferences: AppPreferences = {
-  theme: 'dark',
+  theme: 'system',
   defaultCamera: 'back',
   permissions: {
     camera: false,
@@ -31,6 +31,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
   onExportData
 }) => {
   const [preferences, setPreferences] = useState<AppPreferences>(defaultPreferences);
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,7 +39,6 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
     if (savedPrefs) {
       try {
         const parsed = JSON.parse(savedPrefs);
-        // Ensure permissions object exists
         const mergedPrefs = {
           ...defaultPreferences,
           ...parsed,
@@ -56,7 +56,8 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
   }, []);
 
   const savePreferences = () => {
-    localStorage.setItem('mypoint-preferences', JSON.stringify(preferences));
+    const updatedPrefs = { ...preferences, theme };
+    localStorage.setItem('mypoint-preferences', JSON.stringify(updatedPrefs));
     toast({
       title: "Preferências salvas!",
       description: "Suas configurações foram atualizadas.",
@@ -128,7 +129,6 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
           break;
       }
       
-      // Recheck permission after request
       setTimeout(() => checkPermission(type), 500);
       
     } catch (error) {
@@ -136,12 +136,12 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
     }
   };
 
-  const getThemeIcon = (theme: string) => {
-    switch (theme) {
+  const getThemeIcon = (currentTheme: string) => {
+    switch (currentTheme) {
       case 'light': return <Sun className="w-4 h-4" />;
       case 'dark': return <Moon className="w-4 h-4" />;
       case 'system': return <Monitor className="w-4 h-4" />;
-      default: return <Moon className="w-4 h-4" />;
+      default: return <Monitor className="w-4 h-4" />;
     }
   };
 
@@ -156,66 +156,65 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
     });
   };
 
-  // Ensure permissions object exists before rendering
   if (!preferences.permissions) {
     return null;
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 mobile-spacing">
         <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="sm" onClick={onBack}>
+          <Button variant="ghost" size="sm" onClick={onBack} className="mobile-button">
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <Settings className="w-6 h-6 text-blue-400" />
-          <h1 className="text-xl font-bold text-white">Configurações Avançadas</h1>
+          <h1 className="text-xl font-bold text-foreground">Configurações Avançadas</h1>
         </div>
 
         {/* Theme Settings */}
-        <Card className="bg-secondary/30 border-secondary">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-white">
-              {getThemeIcon(preferences.theme)}
+            <CardTitle className="flex items-center space-x-2 text-foreground">
+              {getThemeIcon(theme)}
               <span>Aparência</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="font-medium text-white mb-3">Tema</h4>
+              <h4 className="font-medium text-foreground mb-3">Tema</h4>
               <div className="flex space-x-2">
                 <Button
-                  onClick={() => setPreferences(prev => ({ ...prev, theme: 'light' }))}
-                  variant={preferences.theme === 'light' ? "default" : "outline"}
+                  onClick={() => setTheme('light')}
+                  variant={theme === 'light' ? "default" : "outline"}
                   size="sm"
-                  className={preferences.theme === 'light' ? 
-                    "bg-blue-600 hover:bg-blue-700" : 
-                    "border-secondary text-white"
-                  }
+                  className={`mobile-button ${theme === 'light' ? 
+                    "bg-primary hover:bg-primary/90" : 
+                    "border-border text-foreground"
+                  }`}
                 >
                   <Sun className="w-4 h-4 mr-1" />
                   Claro
                 </Button>
                 <Button
-                  onClick={() => setPreferences(prev => ({ ...prev, theme: 'dark' }))}
-                  variant={preferences.theme === 'dark' ? "default" : "outline"}
+                  onClick={() => setTheme('dark')}
+                  variant={theme === 'dark' ? "default" : "outline"}
                   size="sm"
-                  className={preferences.theme === 'dark' ? 
-                    "bg-blue-600 hover:bg-blue-700" : 
-                    "border-secondary text-white"
-                  }
+                  className={`mobile-button ${theme === 'dark' ? 
+                    "bg-primary hover:bg-primary/90" : 
+                    "border-border text-foreground"
+                  }`}
                 >
                   <Moon className="w-4 h-4 mr-1" />
                   Escuro
                 </Button>
                 <Button
-                  onClick={() => setPreferences(prev => ({ ...prev, theme: 'system' }))}
-                  variant={preferences.theme === 'system' ? "default" : "outline"}
+                  onClick={() => setTheme('system')}
+                  variant={theme === 'system' ? "default" : "outline"}
                   size="sm"
-                  className={preferences.theme === 'system' ? 
-                    "bg-blue-600 hover:bg-blue-700" : 
-                    "border-secondary text-white"
-                  }
+                  className={`mobile-button ${theme === 'system' ? 
+                    "bg-primary hover:bg-primary/90" : 
+                    "border-border text-foreground"
+                  }`}
                 >
                   <Monitor className="w-4 h-4 mr-1" />
                   Sistema
@@ -224,18 +223,19 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             </div>
 
             <div>
-              <h4 className="font-medium text-white mb-3">Idioma</h4>
+              <h4 className="font-medium text-foreground mb-3">Idioma</h4>
               <Select 
                 value={preferences.language} 
                 onValueChange={(value) => setPreferences(prev => ({ ...prev, language: value }))}
               >
-                <SelectTrigger className="bg-background border-border text-white">
+                <SelectTrigger className="bg-background border-border text-foreground">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-secondary border-secondary">
-                  <SelectItem value="pt-BR" className="text-white">Português (Brasil)</SelectItem>
-                  <SelectItem value="en-US" className="text-white">English (US)</SelectItem>
-                  <SelectItem value="es-ES" className="text-white">Español</SelectItem>
+                <SelectContent className="bg-card border-border">
+                  <SelectItem value="pt-BR" className="text-foreground">Português (Brasil)</SelectItem>
+                  <SelectItem value="en-US" className="text-foreground">English (US)</SelectItem>
+                  <SelectItem value="es-ES" className="text-foreground">Español</SelectItem>
+                  <SelectItem value="hi-IN" className="text-foreground">हिंदी (Hindi)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -243,25 +243,25 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
         </Card>
 
         {/* Camera Settings */}
-        <Card className="bg-secondary/30 border-secondary">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-white">
+            <CardTitle className="flex items-center space-x-2 text-foreground">
               <Camera className="w-5 h-5 text-blue-400" />
               <span>Configurações da Câmera</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h4 className="font-medium text-white mb-3">Câmera Padrão</h4>
+              <h4 className="font-medium text-foreground mb-3">Câmera Padrão</h4>
               <div className="flex space-x-2">
                 <Button
                   onClick={() => setPreferences(prev => ({ ...prev, defaultCamera: 'back' }))}
                   variant={preferences.defaultCamera === 'back' ? "default" : "outline"}
                   size="sm"
-                  className={preferences.defaultCamera === 'back' ? 
-                    "bg-blue-600 hover:bg-blue-700" : 
-                    "border-secondary text-white"
-                  }
+                  className={`mobile-button ${preferences.defaultCamera === 'back' ? 
+                    "bg-primary hover:bg-primary/90" : 
+                    "border-border text-foreground"
+                  }`}
                 >
                   Traseira
                 </Button>
@@ -269,10 +269,10 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
                   onClick={() => setPreferences(prev => ({ ...prev, defaultCamera: 'front' }))}
                   variant={preferences.defaultCamera === 'front' ? "default" : "outline"}
                   size="sm"
-                  className={preferences.defaultCamera === 'front' ? 
-                    "bg-blue-600 hover:bg-blue-700" : 
-                    "border-secondary text-white"
-                  }
+                  className={`mobile-button ${preferences.defaultCamera === 'front' ? 
+                    "bg-primary hover:bg-primary/90" : 
+                    "border-border text-foreground"
+                  }`}
                 >
                   Frontal
                 </Button>
@@ -282,9 +282,9 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
         </Card>
 
         {/* Permissions */}
-        <Card className="bg-secondary/30 border-secondary">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-white">
+            <CardTitle className="flex items-center space-x-2 text-foreground">
               <Settings className="w-5 h-5 text-blue-400" />
               <span>Permissões do App</span>
             </CardTitle>
@@ -293,7 +293,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Camera className="w-4 h-4 text-muted-foreground" />
-                <span className="text-white">Câmera</span>
+                <span className="text-foreground">Câmera</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -304,7 +304,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
                   onClick={() => checkPermission('camera')}
                   size="sm"
                   variant="outline"
-                  className="border-secondary text-white"
+                  className="border-border text-foreground mobile-button"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -314,7 +314,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-white">Localização</span>
+                <span className="text-foreground">Localização</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -325,7 +325,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
                   onClick={() => checkPermission('location')}
                   size="sm"
                   variant="outline"
-                  className="border-secondary text-white"
+                  className="border-border text-foreground mobile-button"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -335,7 +335,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Bell className="w-4 h-4 text-muted-foreground" />
-                <span className="text-white">Notificações</span>
+                <span className="text-foreground">Notificações</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -346,7 +346,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
                   onClick={() => checkPermission('notifications')}
                   size="sm"
                   variant="outline"
-                  className="border-secondary text-white"
+                  className="border-border text-foreground mobile-button"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </Button>
@@ -356,9 +356,9 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
         </Card>
 
         {/* Notifications Settings */}
-        <Card className="bg-secondary/30 border-secondary">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-white">
+            <CardTitle className="flex items-center space-x-2 text-foreground">
               <Bell className="w-5 h-5 text-blue-400" />
               <span>Notificações</span>
             </CardTitle>
@@ -366,7 +366,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-white">Notificações da Jornada</p>
+                <p className="font-medium text-foreground">Notificações da Jornada</p>
                 <p className="text-sm text-muted-foreground">
                   Receber alertas de descanso e fim de jornada.
                 </p>
@@ -383,9 +383,9 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
         </Card>
 
         {/* Data Management */}
-        <Card className="bg-secondary/30 border-secondary">
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-white">
+            <CardTitle className="flex items-center space-x-2 text-foreground">
               <Download className="w-5 h-5 text-blue-400" />
               <span>Gerenciamento de Dados</span>
             </CardTitle>
@@ -394,7 +394,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             <Button
               onClick={onExportData}
               variant="outline"
-              className="w-full border-secondary text-white"
+              className="w-full border-border text-foreground mobile-button"
             >
               <Download className="w-4 h-4 mr-2" />
               Exportar Dados
@@ -403,7 +403,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
             <Button
               onClick={resetOnboarding}
               variant="outline"
-              className="w-full border-secondary text-white"
+              className="w-full border-border text-foreground mobile-button"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Resetar Tutorial
@@ -414,7 +414,7 @@ const AdvancedPreferencesView: React.FC<AdvancedPreferencesViewProps> = ({
         {/* Save Button */}
         <Button
           onClick={savePreferences}
-          className="w-full bg-blue-600 hover:bg-blue-700 h-12"
+          className="w-full bg-primary hover:bg-primary/90 mobile-button"
         >
           <Save className="w-4 h-4 mr-2" />
           Salvar Configurações

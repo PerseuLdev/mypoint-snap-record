@@ -1,235 +1,253 @@
-
-import React, { useState, useEffect } from 'react';
-import { Calendar, History, User, Home, FileText, AlertTriangle, Trash2 } from 'lucide-react';
-import HomeView from '@/components/HomeView';
-import StepRegistrationView from '@/components/StepRegistrationView';
-import AdvancedHistoryView from '@/components/AdvancedHistoryView';
-import ShiftTypesView from '@/components/ShiftTypesView';
-import UserProfileView from '@/components/UserProfileView';
-import AttestadoView from '@/components/AttestadoView';
-import OcorrenciaView from '@/components/OcorrenciaView';
-import TrashView from '@/components/TrashView';
-import CalendarFilterView from '@/components/CalendarFilterView';
-import ShiftTypeManagementView from '@/components/ShiftTypeManagementView';
-import AlarmsView from '@/components/AlarmsView';
-import AdvancedPreferencesView from '@/components/AdvancedPreferencesView';
-import WelcomeScreen from '@/components/WelcomeScreen';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import HomeView from '../components/HomeView';
+import HistoryView from '../components/HistoryView';
+import AdvancedHistoryView from '../components/AdvancedHistoryView';
+import CalendarFilterView from '../components/CalendarFilterView';
+import TrashView from '../components/TrashView';
+import StepRegistrationView from '../components/StepRegistrationView';
+import SettingsView from '../components/SettingsView';
+import AdvancedPreferencesView from '../components/AdvancedPreferencesView';
+import UserProfileView from '../components/UserProfileView';
+import ProfileView from '../components/ProfileView';
+import ShiftTypesView from '../components/ShiftTypesView';
+import ShiftTypeManagementView from '../components/ShiftTypeManagementView';
+import AlarmsView from '../components/AlarmsView';
+import AttestadoView from '../components/AttestadoView';
+import OcorrenciaView from '../components/OcorrenciaView';
+import WelcomeScreen from '../components/WelcomeScreen';
+import { TimeRecord, ShiftType, AttestadoRecord, OcorrenciaRecord, Alarm } from '@/types';
 import { useWorkdayReminder } from '@/hooks/useWorkdayReminder';
-import { TimeRecord, ShiftType, AttestadoRecord, OcorrenciaRecord, Alarm, AppPreferences } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 
-type ScreenType = 'welcome' | 'home' | 'registrar' | 'historico' | 'jornada' | 'perfil' | 
-                  'atestado' | 'ocorrencia' | 'lixeira' | 'calendario' | 'tipos-turno' | 
-                  'alarmes' | 'configuracoes';
+const queryClient = new QueryClient();
 
-const MyPointApp = () => {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('welcome');
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
-  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
-  const [deletedRecords, setDeletedRecords] = useState<TimeRecord[]>([]);
-  const [atestados, setAtestados] = useState<AttestadoRecord[]>([]);
-  const [ocorrencias, setOcorrencias] = useState<OcorrenciaRecord[]>([]);
-  const [shiftTypes, setShiftTypes] = useState<ShiftType[]>([]);
-  const [alarms, setAlarms] = useState<Alarm[]>([]);
+export type ViewType = 
+  | 'home' 
+  | 'history' 
+  | 'advanced-history'
+  | 'calendar-filter'
+  | 'trash'
+  | 'registration'
+  | 'settings'
+  | 'advanced-preferences'
+  | 'user-profile'
+  | 'profile'
+  | 'shift-types'
+  | 'shift-management'
+  | 'alarms'
+  | 'attestado'
+  | 'ocorrencia'
+  | 'welcome';
+
+const Index = () => {
+  const [currentView, setCurrentView] = useState<ViewType>('welcome');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [locationStatus, setLocationStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [selectedFilterDate, setSelectedFilterDate] = useState<Date | undefined>();
+  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
+  const [shiftTypes, setShiftTypes] = useState<ShiftType[]>([]);
+  const [attestadoRecords, setAttestadoRecords] = useState<AttestadoRecord[]>([]);
+  const [ocorrenciaRecords, setOcorrenciaRecords] = useState<OcorrenciaRecord[]>([]);
+  const [alarms, setAlarms] = useState<Alarm[]>([]);
   const { toast } = useToast();
 
-  useWorkdayReminder(timeRecords);
-
-  // Check if onboarding was completed
   useEffect(() => {
-    const savedPrefs = localStorage.getItem('mypoint-preferences');
-    const preferences: AppPreferences = savedPrefs ? JSON.parse(savedPrefs) : {};
-    
-    if (preferences.hasCompletedOnboarding) {
-      setCurrentScreen('home');
-      setPermissionsGranted(true);
-      setLocationStatus('success');
-    }
+    const checkOnboarding = () => {
+      const savedPrefs = localStorage.getItem('mypoint-preferences');
+      if (savedPrefs) {
+        const preferences = JSON.parse(savedPrefs);
+        if (!preferences.hasCompletedOnboarding) {
+          setCurrentView('welcome');
+        } else {
+          setCurrentView('home');
+        }
+      } else {
+        setCurrentView('welcome');
+      }
+    };
+
+    checkOnboarding();
   }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
+
     return () => clearInterval(timer);
   }, []);
 
-  // Load data from localStorage
   useEffect(() => {
-    const savedRecords = localStorage.getItem('mypoint-records');
-    if (savedRecords) {
-      const records = JSON.parse(savedRecords);
-      setTimeRecords(records.filter((r: TimeRecord) => !r.deleted));
-      setDeletedRecords(records.filter((r: TimeRecord) => r.deleted));
-    }
-
-    const savedAtestados = localStorage.getItem('mypoint-atestados');
-    if (savedAtestados) {
-      setAtestados(JSON.parse(savedAtestados));
-    }
-
-    const savedOcorrencias = localStorage.getItem('mypoint-ocorrencias');
-    if (savedOcorrencias) {
-      setOcorrencias(JSON.parse(savedOcorrencias));
-    }
-
-    const savedShiftTypes = localStorage.getItem('mypoint-shift-types');
-    if (savedShiftTypes) {
-      setShiftTypes(JSON.parse(savedShiftTypes));
-    } else {
-      // Create default shift types
-      const defaultShifts: ShiftType[] = [
-        {
-          id: '1',
-          name: 'Noturno',
-          color: '#3B82F6',
-          startTime: '19:00',
-          endTime: '07:00',
-          reminderOffsets: [15, 30]
-        },
-        {
-          id: '2',
-          name: 'Diurno',
-          color: '#22C55E',
-          startTime: '08:00',
-          endTime: '17:00',
-          reminderOffsets: [15]
-        }
-      ];
-      setShiftTypes(defaultShifts);
-      localStorage.setItem('mypoint-shift-types', JSON.stringify(defaultShifts));
-    }
-
-    const savedAlarms = localStorage.getItem('mypoint-alarms');
-    if (savedAlarms) {
-      setAlarms(JSON.parse(savedAlarms));
-    }
-  }, []);
-
-  const saveRecords = (records: TimeRecord[]) => {
-    const allRecords = [...records, ...deletedRecords];
-    localStorage.setItem('mypoint-records', JSON.stringify(allRecords));
-    setTimeRecords(records);
-  };
-
-  const saveDeletedRecords = (deleted: TimeRecord[]) => {
-    const allRecords = [...timeRecords, ...deleted];
-    localStorage.setItem('mypoint-records', JSON.stringify(allRecords));
-    setDeletedRecords(deleted);
-  };
-
-  const handlePermissionsGranted = () => {
-    setPermissionsGranted(true);
-    setCurrentScreen('home');
-    setLocationStatus('success');
-    
-    // Save onboarding completion
-    const savedPrefs = localStorage.getItem('mypoint-preferences');
-    const preferences: AppPreferences = savedPrefs ? JSON.parse(savedPrefs) : {};
-    preferences.hasCompletedOnboarding = true;
-    localStorage.setItem('mypoint-preferences', JSON.stringify(preferences));
-    
-    toast({
-      title: "Bem-vindo ao MyPoint!",
-      description: "Agora você pode usar todas as funcionalidades do app.",
-    });
-  };
-
-  const handlePhotoCapture = (photoData: string, type: TimeRecord['type']) => {
-    const newRecord: TimeRecord = {
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      location: {
-        latitude: -23.5505 + (Math.random() - 0.5) * 0.01,
-        longitude: -46.6333 + (Math.random() - 0.5) * 0.01,
-        address: "Rua Exemplo, 123 - São Paulo, SP"
-      },
-      photo: photoData,
-      type
+    const updateLocation = () => {
+      setLocationStatus('loading');
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            setLocationStatus('success');
+          },
+          () => {
+            setLocationStatus('error');
+          },
+          { timeout: 10000 }
+        );
+      } else {
+        setLocationStatus('error');
+      }
     };
 
-    const updatedRecords = [newRecord, ...timeRecords];
-    saveRecords(updatedRecords);
+    updateLocation();
+    const locationInterval = setInterval(updateLocation, 30000);
 
-    toast({
-      title: "Ponto registrado!",
-      description: `${type === 'entrada' ? 'Entrada' : 
-                    type === 'pausa_inicio' ? 'Início da pausa' : 
-                    type === 'pausa_fim' ? 'Fim da pausa' : 'Saída'} registrada com sucesso.`,
-    });
+    return () => clearInterval(locationInterval);
+  }, []);
 
-    setCurrentScreen('home');
+  useEffect(() => {
+    const loadData = () => {
+      const savedRecords = localStorage.getItem('mypoint-time-records');
+      if (savedRecords) {
+        setTimeRecords(JSON.parse(savedRecords));
+      }
+
+      const savedShiftTypes = localStorage.getItem('mypoint-shift-types');
+      if (savedShiftTypes) {
+        setShiftTypes(JSON.parse(savedShiftTypes));
+      }
+
+      const savedAttestados = localStorage.getItem('mypoint-attestado-records');
+      if (savedAttestados) {
+        setAttestadoRecords(JSON.parse(savedAttestados));
+      }
+
+      const savedOcorrencias = localStorage.getItem('mypoint-ocorrencia-records');
+      if (savedOcorrencias) {
+        setOcorrenciaRecords(JSON.parse(savedOcorrencias));
+      }
+
+      const savedAlarms = localStorage.getItem('mypoint-alarms');
+      if (savedAlarms) {
+        setAlarms(JSON.parse(savedAlarms));
+      }
+    };
+
+    loadData();
+  }, []);
+
+  useWorkdayReminder(timeRecords);
+
+  const getActiveShiftType = (): ShiftType | undefined => {
+    const today = new Date().toDateString();
+    const todayRecords = timeRecords.filter(record => 
+      new Date(record.timestamp).toDateString() === today && !record.deleted
+    ).sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+    if (todayRecords.length === 0) return undefined;
+
+    const lastRecord = todayRecords[todayRecords.length - 1];
+    return shiftTypes.find(st => st.id === lastRecord.shiftType);
+  };
+
+  const handlePhotoCapture = async (photoData: string, type: TimeRecord['type']) => {
+    try {
+      let location = { latitude: 0, longitude: 0, address: 'Localização não disponível' };
+      
+      if (navigator.geolocation) {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        
+        location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          address: `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+        };
+      }
+
+      const newRecord: TimeRecord = {
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        location,
+        photo: photoData,
+        type,
+        shiftType: getActiveShiftType()?.id
+      };
+
+      const updatedRecords = [...timeRecords, newRecord];
+      setTimeRecords(updatedRecords);
+      localStorage.setItem('mypoint-time-records', JSON.stringify(updatedRecords));
+
+      toast({
+        title: "Ponto registrado!",
+        description: `${type === 'entrada' ? 'Entrada' : type === 'pausa_inicio' ? 'Início da pausa' : type === 'pausa_fim' ? 'Fim da pausa' : 'Saída'} registrada com sucesso.`,
+      });
+
+      setCurrentView('home');
+    } catch (error) {
+      toast({
+        title: "Erro ao registrar ponto",
+        description: "Não foi possível obter a localização. Tente novamente.",
+      });
+    }
   };
 
   const handleDeleteRecord = (id: string) => {
-    const recordToDelete = timeRecords.find(r => r.id === id);
-    if (recordToDelete) {
-      const deletedRecord = { 
-        ...recordToDelete, 
-        deleted: true, 
-        deletedAt: new Date().toISOString() 
-      };
-      const updatedRecords = timeRecords.filter(r => r.id !== id);
-      const updatedDeleted = [deletedRecord, ...deletedRecords];
-      
-      setTimeRecords(updatedRecords);
-      setDeletedRecords(updatedDeleted);
-      
-      const allRecords = [...updatedRecords, ...updatedDeleted];
-      localStorage.setItem('mypoint-records', JSON.stringify(allRecords));
-    }
+    const updatedRecords = timeRecords.map(record => 
+      record.id === id 
+        ? { ...record, deleted: true, deletedAt: new Date().toISOString() }
+        : record
+    );
+    setTimeRecords(updatedRecords);
+    localStorage.setItem('mypoint-time-records', JSON.stringify(updatedRecords));
+    
+    toast({
+      title: "Registro excluído",
+      description: "O registro foi movido para a lixeira.",
+    });
   };
 
   const handleRestoreRecord = (id: string) => {
-    const recordToRestore = deletedRecords.find(r => r.id === id);
-    if (recordToRestore) {
-      const { deleted, deletedAt, ...restoredRecord } = recordToRestore;
-      const updatedDeleted = deletedRecords.filter(r => r.id !== id);
-      const updatedRecords = [restoredRecord, ...timeRecords];
-      
-      setDeletedRecords(updatedDeleted);
-      setTimeRecords(updatedRecords);
-      
-      const allRecords = [...updatedRecords, ...updatedDeleted];
-      localStorage.setItem('mypoint-records', JSON.stringify(allRecords));
-    }
+    const updatedRecords = timeRecords.map(record => 
+      record.id === id 
+        ? { ...record, deleted: false, deletedAt: undefined }
+        : record
+    );
+    setTimeRecords(updatedRecords);
+    localStorage.setItem('mypoint-time-records', JSON.stringify(updatedRecords));
+    
+    toast({
+      title: "Registro restaurado",
+      description: "O registro foi restaurado com sucesso.",
+    });
   };
 
   const handlePermanentDelete = (id: string) => {
-    const updatedDeleted = deletedRecords.filter(r => r.id !== id);
-    setDeletedRecords(updatedDeleted);
+    const updatedRecords = timeRecords.filter(record => record.id !== id);
+    setTimeRecords(updatedRecords);
+    localStorage.setItem('mypoint-time-records', JSON.stringify(updatedRecords));
     
-    const allRecords = [...timeRecords, ...updatedDeleted];
-    localStorage.setItem('mypoint-records', JSON.stringify(allRecords));
+    toast({
+      title: "Registro excluído permanentemente",
+      description: "O registro foi removido definitivamente.",
+    });
   };
 
-  const handleEmptyTrash = () => {
-    setDeletedRecords([]);
-    localStorage.setItem('mypoint-records', JSON.stringify(timeRecords));
-  };
-
-  const handleSaveAtestado = (atestado: Omit<AttestadoRecord, 'id'>) => {
-    const newAtestado = { ...atestado, id: Date.now().toString() };
-    const updatedAtestados = [newAtestado, ...atestados];
-    setAtestados(updatedAtestados);
-    localStorage.setItem('mypoint-atestados', JSON.stringify(updatedAtestados));
-  };
-
-  const handleSaveOcorrencia = (ocorrencia: Omit<OcorrenciaRecord, 'id'>) => {
-    const newOcorrencia = { ...ocorrencia, id: Date.now().toString() };
-    const updatedOcorrencias = [newOcorrencia, ...ocorrencias];
-    setOcorrencias(updatedOcorrencias);
-    localStorage.setItem('mypoint-ocorrencias', JSON.stringify(updatedOcorrencias));
-  };
-
-  const handleSaveShiftType = (shiftType: Omit<ShiftType, 'id'>) => {
-    const newShiftType = { ...shiftType, id: Date.now().toString() };
+  const handleCreateShiftType = (shiftType: Omit<ShiftType, 'id'>) => {
+    const newShiftType: ShiftType = {
+      ...shiftType,
+      id: Date.now().toString()
+    };
+    
     const updatedShiftTypes = [...shiftTypes, newShiftType];
     setShiftTypes(updatedShiftTypes);
     localStorage.setItem('mypoint-shift-types', JSON.stringify(updatedShiftTypes));
+    
+    toast({
+      title: "Tipo de turno criado!",
+      description: `O turno "${shiftType.name}" foi criado com sucesso.`,
+    });
   };
 
   const handleUpdateShiftType = (id: string, updates: Partial<ShiftType>) => {
@@ -238,42 +256,104 @@ const MyPointApp = () => {
     );
     setShiftTypes(updatedShiftTypes);
     localStorage.setItem('mypoint-shift-types', JSON.stringify(updatedShiftTypes));
+    
+    toast({
+      title: "Tipo de turno atualizado!",
+      description: "As alterações foram salvas com sucesso.",
+    });
   };
 
   const handleDeleteShiftType = (id: string) => {
     const updatedShiftTypes = shiftTypes.filter(st => st.id !== id);
     setShiftTypes(updatedShiftTypes);
     localStorage.setItem('mypoint-shift-types', JSON.stringify(updatedShiftTypes));
+    
+    toast({
+      title: "Tipo de turno excluído",
+      description: "O tipo de turno foi removido com sucesso.",
+    });
   };
 
-  const handleSaveAlarm = (alarm: Omit<Alarm, 'id'>) => {
-    const newAlarm = { ...alarm, id: Date.now().toString() };
+  const handleCreateAttestado = (attestado: Omit<AttestadoRecord, 'id' | 'timestamp'>) => {
+    const newAttestado: AttestadoRecord = {
+      ...attestado,
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString()
+    };
+    
+    const updatedAttestados = [...attestadoRecords, newAttestado];
+    setAttestadoRecords(updatedAttestados);
+    localStorage.setItem('mypoint-attestado-records', JSON.stringify(updatedAttestados));
+    
+    toast({
+      title: "Atestado registrado!",
+      description: "O atestado foi salvo com sucesso.",
+    });
+  };
+
+  const handleCreateOcorrencia = (ocorrencia: Omit<OcorrenciaRecord, 'id' | 'timestamp'>) => {
+    const newOcorrencia: OcorrenciaRecord = {
+      ...ocorrencia,
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString()
+    };
+    
+    const updatedOcorrencias = [...ocorrenciaRecords, newOcorrencia];
+    setOcorrenciaRecords(updatedOcorrencias);
+    localStorage.setItem('mypoint-ocorrencia-records', JSON.stringify(updatedOcorrencias));
+    
+    toast({
+      title: "Ocorrência registrada!",
+      description: "A ocorrência foi salva com sucesso.",
+    });
+  };
+
+  const handleCreateAlarm = (alarm: Omit<Alarm, 'id'>) => {
+    const newAlarm: Alarm = {
+      ...alarm,
+      id: Date.now().toString()
+    };
+    
     const updatedAlarms = [...alarms, newAlarm];
     setAlarms(updatedAlarms);
     localStorage.setItem('mypoint-alarms', JSON.stringify(updatedAlarms));
+    
+    toast({
+      title: "Alarme criado!",
+      description: `Alarme "${alarm.name}" foi criado com sucesso.`,
+    });
   };
 
   const handleUpdateAlarm = (id: string, updates: Partial<Alarm>) => {
-    const updatedAlarms = alarms.map(a => 
-      a.id === id ? { ...a, ...updates } : a
+    const updatedAlarms = alarms.map(alarm => 
+      alarm.id === id ? { ...alarm, ...updates } : alarm
     );
     setAlarms(updatedAlarms);
     localStorage.setItem('mypoint-alarms', JSON.stringify(updatedAlarms));
+    
+    toast({
+      title: "Alarme atualizado!",
+      description: "As alterações foram salvas com sucesso.",
+    });
   };
 
   const handleDeleteAlarm = (id: string) => {
-    const updatedAlarms = alarms.filter(a => a.id !== id);
+    const updatedAlarms = alarms.filter(alarm => alarm.id !== id);
     setAlarms(updatedAlarms);
     localStorage.setItem('mypoint-alarms', JSON.stringify(updatedAlarms));
+    
+    toast({
+      title: "Alarme excluído",
+      description: "O alarme foi removido com sucesso.",
+    });
   };
 
   const handleExportData = () => {
     const data = {
-      records: timeRecords,
-      deletedRecords,
-      atestados,
-      ocorrencias,
+      timeRecords,
       shiftTypes,
+      attestadoRecords,
+      ocorrenciaRecords,
       alarms,
       exportDate: new Date().toISOString()
     };
@@ -283,183 +363,194 @@ const MyPointApp = () => {
     const a = document.createElement('a');
     a.href = url;
     a.download = `mypoint-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
     toast({
       title: "Dados exportados!",
-      description: "Backup dos seus dados foi baixado com sucesso.",
+      description: "O backup foi salvo com sucesso.",
     });
   };
 
-  if (currentScreen === 'welcome') {
-    return <WelcomeScreen onPermissionsGranted={handlePermissionsGranted} />;
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <main className="max-w-md mx-auto">
-        {currentScreen === 'home' && (
-          <HomeView 
-            onNavigateToRegistrar={() => setCurrentScreen('registrar')}
-            onNavigateToAtestado={() => setCurrentScreen('atestado')}
-            onNavigateToOcorrencia={() => setCurrentScreen('ocorrencia')}
-            recordsCount={timeRecords.length}
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'welcome':
+        return (
+          <WelcomeScreen 
+            onComplete={() => setCurrentView('home')}
           />
-        )}
-
-        {currentScreen === 'registrar' && (
-          <StepRegistrationView 
+        );
+        
+      case 'home':
+        return (
+          <HomeView
+            onNavigate={setCurrentView}
+            timeRecords={timeRecords}
+            currentTime={currentTime}
+            locationStatus={locationStatus}
+            shiftTypes={shiftTypes}
+            activeShiftType={getActiveShiftType()}
+          />
+        );
+        
+      case 'registration':
+        return (
+          <StepRegistrationView
             onPhotoCapture={handlePhotoCapture}
             currentTime={currentTime}
             locationStatus={locationStatus}
             timeRecords={timeRecords}
             shiftTypes={shiftTypes}
-            activeShiftType={shiftTypes.find(st => st.name === 'Noturno')}
+            activeShiftType={getActiveShiftType()}
           />
-        )}
-
-        {currentScreen === 'historico' && (
-          <AdvancedHistoryView 
-            records={timeRecords}
-            onBack={() => setCurrentScreen('home')}
+        );
+        
+      case 'history':
+        return (
+          <HistoryView
+            onBack={() => setCurrentView('home')}
+            onAdvancedView={() => setCurrentView('advanced-history')}
             onDeleteRecord={handleDeleteRecord}
-            onOpenTrash={() => setCurrentScreen('lixeira')}
-            onOpenCalendar={() => setCurrentScreen('calendario')}
-            selectedDate={selectedFilterDate}
+            timeRecords={timeRecords.filter(record => !record.deleted)}
           />
-        )}
-
-        {currentScreen === 'jornada' && (
-          <ShiftTypesView 
-            onBack={() => setCurrentScreen('home')}
-            shiftTypes={shiftTypes}
-            onManageShiftTypes={() => setCurrentScreen('tipos-turno')}
-            onManageAlarms={() => setCurrentScreen('alarmes')}
+        );
+        
+      case 'advanced-history':
+        return (
+          <AdvancedHistoryView
+            onBack={() => setCurrentView('history')}
+            onCalendarFilter={() => setCurrentView('calendar-filter')}
+            timeRecords={timeRecords.filter(record => !record.deleted)}
           />
-        )}
-
-        {currentScreen === 'perfil' && (
-          <UserProfileView 
-            onBack={() => setCurrentScreen('home')}
-            onOpenPreferences={() => setCurrentScreen('configuracoes')}
+        );
+        
+      case 'calendar-filter':
+        return (
+          <CalendarFilterView
+            onBack={() => setCurrentView('advanced-history')}
+            timeRecords={timeRecords.filter(record => !record.deleted)}
           />
-        )}
-
-        {currentScreen === 'atestado' && (
-          <AttestadoView 
-            onBack={() => setCurrentScreen('home')}
-            onSave={handleSaveAtestado}
-          />
-        )}
-
-        {currentScreen === 'ocorrencia' && (
-          <OcorrenciaView 
-            onBack={() => setCurrentScreen('home')}
-            onSave={handleSaveOcorrencia}
-          />
-        )}
-
-        {currentScreen === 'lixeira' && (
-          <TrashView 
-            onBack={() => setCurrentScreen('historico')}
-            deletedRecords={deletedRecords}
-            onRestore={handleRestoreRecord}
+        );
+        
+      case 'trash':
+        return (
+          <TrashView
+            onBack={() => setCurrentView('home')}
+            onRestoreRecord={handleRestoreRecord}
             onPermanentDelete={handlePermanentDelete}
-            onEmptyTrash={handleEmptyTrash}
+            deletedRecords={timeRecords.filter(record => record.deleted)}
           />
-        )}
-
-        {currentScreen === 'calendario' && (
-          <CalendarFilterView 
-            onBack={() => setCurrentScreen('historico')}
-            selectedDate={selectedFilterDate}
-            onDateSelect={setSelectedFilterDate}
+        );
+        
+      case 'settings':
+        return (
+          <SettingsView
+            onBack={() => setCurrentView('home')}
+            onAdvancedPreferences={() => setCurrentView('advanced-preferences')}
+            onUserProfile={() => setCurrentView('user-profile')}
           />
-        )}
-
-        {currentScreen === 'tipos-turno' && (
-          <ShiftTypeManagementView 
-            onBack={() => setCurrentScreen('jornada')}
+        );
+        
+      case 'advanced-preferences':
+        return (
+          <AdvancedPreferencesView
+            onBack={() => setCurrentView('settings')}
+            onExportData={handleExportData}
+          />
+        );
+        
+      case 'user-profile':
+        return (
+          <UserProfileView
+            onBack={() => setCurrentView('settings')}
+            onProfile={() => setCurrentView('profile')}
+          />
+        );
+        
+      case 'profile':
+        return (
+          <ProfileView
+            onBack={() => setCurrentView('user-profile')}
+          />
+        );
+        
+      case 'shift-types':
+        return (
+          <ShiftTypesView
+            onBack={() => setCurrentView('home')}
             shiftTypes={shiftTypes}
-            onSaveShiftType={handleSaveShiftType}
+            onManageShiftTypes={() => setCurrentView('shift-management')}
+            onManageAlarms={() => setCurrentView('alarms')}
+          />
+        );
+        
+      case 'shift-management':
+        return (
+          <ShiftTypeManagementView
+            onBack={() => setCurrentView('shift-types')}
+            shiftTypes={shiftTypes}
+            onCreateShiftType={handleCreateShiftType}
             onUpdateShiftType={handleUpdateShiftType}
             onDeleteShiftType={handleDeleteShiftType}
           />
-        )}
-
-        {currentScreen === 'alarmes' && (
-          <AlarmsView 
-            onBack={() => setCurrentScreen('jornada')}
+        );
+        
+      case 'alarms':
+        return (
+          <AlarmsView
+            onBack={() => setCurrentView('shift-types')}
             alarms={alarms}
-            onSaveAlarm={handleSaveAlarm}
+            onCreateAlarm={handleCreateAlarm}
             onUpdateAlarm={handleUpdateAlarm}
             onDeleteAlarm={handleDeleteAlarm}
           />
-        )}
-
-        {currentScreen === 'configuracoes' && (
-          <AdvancedPreferencesView 
-            onBack={() => setCurrentScreen('perfil')}
-            onExportData={handleExportData}
+        );
+        
+      case 'attestado':
+        return (
+          <AttestadoView
+            onBack={() => setCurrentView('home')}
+            onCreateAttestado={handleCreateAttestado}
+            attestadoRecords={attestadoRecords}
           />
-        )}
-      </main>
+        );
+        
+      case 'ocorrencia':
+        return (
+          <OcorrenciaView
+            onBack={() => setCurrentView('home')}
+            onCreateOcorrencia={handleCreateOcorrencia}
+            ocorrenciaRecords={ocorrenciaRecords}
+          />
+        );
+        
+      default:
+        return (
+          <HomeView
+            onNavigate={setCurrentView}
+            timeRecords={timeRecords}
+            currentTime={currentTime}
+            locationStatus={locationStatus}
+            shiftTypes={shiftTypes}
+            activeShiftType={getActiveShiftType()}
+          />
+        );
+    }
+  };
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
-        <div className="max-w-md mx-auto flex">
-          <button
-            onClick={() => setCurrentScreen('home')}
-            className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
-              currentScreen === 'home' 
-                ? 'text-primary bg-primary/10' 
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Home className="w-5 h-5" />
-            <span className="text-xs font-medium">Início</span>
-          </button>
-          
-          <button
-            onClick={() => setCurrentScreen('historico')}
-            className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
-              currentScreen === 'historico' 
-                ? 'text-primary bg-primary/10' 
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <History className="w-5 h-5" />
-            <span className="text-xs font-medium">Registros</span>
-          </button>
-          
-          <button
-            onClick={() => setCurrentScreen('jornada')}
-            className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
-              currentScreen === 'jornada' 
-                ? 'text-primary bg-primary/10' 
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Calendar className="w-5 h-5" />
-            <span className="text-xs font-medium">Jornada</span>
-          </button>
-
-          <button
-            onClick={() => setCurrentScreen('perfil')}
-            className={`flex-1 py-3 px-4 flex flex-col items-center space-y-1 transition-colors ${
-              currentScreen === 'perfil' 
-                ? 'text-primary bg-primary/10' 
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <User className="w-5 h-5" />
-            <span className="text-xs font-medium">Perfil</span>
-          </button>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <div className="min-h-screen bg-background">
+          {renderCurrentView()}
         </div>
-      </nav>
-    </div>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
-export default MyPointApp;
+export default Index;
