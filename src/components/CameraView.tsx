@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, MapPin, Clock, User, CheckCircle, AlertTriangle, Circle, FileText, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWorkdayTimer } from '@/hooks/useWorkdayTimer';
+import { useToast } from '@/hooks/use-toast';
 
 interface TimeRecord {
   id: string;
@@ -28,56 +30,121 @@ const CameraView: React.FC<CameraViewProps> = ({
 }) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [lastCaptureTime, setLastCaptureTime] = useState<Date | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { timeRemaining, workdayStarted } = useWorkdayTimer(timeRecords);
+  const { toast } = useToast();
 
-  // Simulate camera functionality with rear camera
+  // Initialize camera
+  useEffect(() => {
+    const initCamera = async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: 'environment' }, // Prefer rear camera
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        
+        setStream(mediaStream);
+        setCameraError(null);
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (error) {
+        console.error('Erro ao acessar câmera:', error);
+        setCameraError('Não foi possível acessar a câmera. Verifique as permissões.');
+        toast({
+          title: "Erro na câmera",
+          description: "Não foi possível acessar a câmera. Verifique as permissões.",
+        });
+      }
+    };
+
+    initCamera();
+
+    // Cleanup function
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  // Real camera capture
   const handleCapture = async () => {
+    if (!videoRef.current || !canvasRef.current || cameraError) {
+      toast({
+        title: "Erro",
+        description: "Câmera não disponível",
+      });
+      return;
+    }
+
     setIsCapturing(true);
     
-    // Simulate photo capture delay
-    setTimeout(() => {
-      // Generate a placeholder image simulating a receipt/document photo
-      const canvas = document.createElement('canvas');
+    try {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
       const ctx = canvas.getContext('2d');
       
-      canvas.width = 640;
-      canvas.height = 480;
+      if (!ctx) {
+        throw new Error('Não foi possível obter contexto do canvas');
+      }
+
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
       
-      if (ctx) {
-        // Create a more realistic document background
-        ctx.fillStyle = '#f8f9fa';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Simulate a document/receipt
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(50, 100, 540, 280);
-        ctx.strokeStyle = '#dee2e6';
-        ctx.strokeRect(50, 100, 540, 280);
-        
-        // Add document content simulation
-        ctx.fillStyle = '#212529';
-        ctx.font = '16px Arial';
-        ctx.fillText('COMPROVANTE DE PONTO', 70, 130);
-        ctx.font = '14px Arial';
-        ctx.fillText(`Data: ${currentTime.toLocaleDateString()}`, 70, 160);
-        ctx.fillText(`Horário: ${currentTime.toLocaleTimeString()}`, 70, 180);
-        ctx.fillText('Localização: Confirmada', 70, 200);
-        
-        // Add timestamp overlay (as if taken by rear camera)
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, 0, canvas.width, 30);
-        ctx.fillStyle = 'white';
-        ctx.font = '14px Arial';
-        ctx.fillText(`📸 ${currentTime.toLocaleString()} - Câmera Traseira`, 10, 20);
+      // Draw video frame to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Add overlay with timestamp and type
+      const recordType = recordsCount % 2 === 0 ? 'ENTRADA' : 'SAÍDA';
+      const timestamp = currentTime.toLocaleString();
+      
+      // Add semi-transparent overlay
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, canvas.width, 40);
+      
+      // Add text overlay
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`MyPoint - ${recordType}`, 10, 25);
+      
+      ctx.font = '14px Arial';
+      ctx.fillText(timestamp, 10, canvas.height - 10);
+      
+      // Add location if available
+      if (locationStatus === 'success') {
+        ctx.fillText('📍 Localização confirmada', canvas.width - 200, canvas.height - 10);
       }
       
+      // Convert to data URL
       const photoData = canvas.toDataURL('image/jpeg', 0.8);
       
       onPhotoCapture(photoData);
       setLastCaptureTime(new Date());
       setIsCapturing(false);
-    }, 1500);
+      
+      toast({
+        title: "Foto capturada!",
+        description: `${recordType.toLowerCase()} registrada com sucesso.`,
+      });
+      
+    } catch (error) {
+      console.error('Erro ao capturar foto:', error);
+      setIsCapturing(false);
+      toast({
+        title: "Erro na captura",
+        description: "Não foi possível capturar a foto. Tente novamente.",
+      });
+    }
   };
 
   const getNextRecordType = () => {
@@ -177,26 +244,42 @@ const CameraView: React.FC<CameraViewProps> = ({
         </CardContent>
       </Card>
 
-      {/* Camera Preview - Clean design */}
+      {/* Camera Preview */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="relative bg-gradient-to-br from-slate-200 to-slate-400 aspect-[4/3] flex items-center justify-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-300 opacity-50"></div>
-            
-            <div className="relative z-10 text-center">
-              <Camera className="w-16 h-16 text-slate-600 mx-auto mb-2" />
-              <p className="text-slate-700 font-medium">Câmera Ativa</p>
-              <p className="text-sm text-slate-600">Posicione o comprovante no centro</p>
-            </div>
-
-            <div className="absolute top-8 left-8 right-8 bottom-8 border-2 border-white border-dashed rounded-lg opacity-70">
-              <div className="absolute -top-6 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
-                📄 Comprovante aqui
+          <div className="relative aspect-[4/3] bg-black">
+            {cameraError ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-200">
+                <div className="text-center">
+                  <Camera className="w-16 h-16 text-slate-400 mx-auto mb-2" />
+                  <p className="text-slate-600 font-medium">Câmera indisponível</p>
+                  <p className="text-sm text-slate-500">{cameraError}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Document frame guide */}
+                <div className="absolute top-8 left-8 right-8 bottom-8 border-2 border-white border-dashed rounded-lg opacity-70">
+                  <div className="absolute -top-6 left-2 text-white text-xs bg-black bg-opacity-50 px-2 py-1 rounded">
+                    📄 Comprovante aqui
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
 
       {/* Next Record Type */}
       <Card className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
@@ -222,7 +305,7 @@ const CameraView: React.FC<CameraViewProps> = ({
       <div className="flex justify-center pt-4">
         <Button
           onClick={handleCapture}
-          disabled={isCapturing || locationStatus === 'loading'}
+          disabled={isCapturing || locationStatus === 'loading' || !!cameraError}
           className={`w-32 h-32 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 transition-all duration-200 ${
             isCapturing ? 'scale-95' : 'hover:scale-105'
           }`}
