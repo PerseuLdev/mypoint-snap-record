@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface UserProfileViewProps {
   onBack: () => void;
+  onOpenPreferences: () => void;
 }
 
-const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack }) => {
+const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPreferences }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -33,14 +34,14 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack }) => {
             <Button variant="ghost" size="sm">
               <Sun className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={onOpenPreferences}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-6 pb-24">
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">Perfil e Preferências</h2>
           <p className="text-muted-foreground">
@@ -76,94 +77,80 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack }) => {
           </CardContent>
         </Card>
 
-        {/* App Preferences */}
+        {/* Quick Settings Preview */}
         <Card className="bg-secondary/30 border-secondary">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-white">
               <Settings className="w-5 h-5 text-blue-400" />
-              <span>Preferências do App</span>
+              <span>Configurações Rápidas</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <h4 className="font-medium text-white mb-3">Tema</h4>
-              <div className="flex space-x-2">
-                <Button variant="outline" size="sm" className="border-muted">
-                  Claro
-                </Button>
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  Escuro
-                </Button>
-                <Button variant="outline" size="sm" className="border-muted">
-                  Sistema
-                </Button>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-white">Tema</p>
+                <p className="text-sm text-muted-foreground">Escuro</p>
               </div>
+              <Moon className="w-5 h-5 text-blue-400" />
             </div>
 
-            <div>
-              <h4 className="font-medium text-white mb-3">Idioma</h4>
-              <select className="w-full p-2 bg-secondary border border-border rounded-md text-white">
-                <option>Português (Brasil)</option>
-              </select>
-            </div>
-
-            <div>
-              <h4 className="font-medium text-white mb-3">Câmera Padrão</h4>
-              <div className="flex space-x-2">
-                <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  Traseira
-                </Button>
-                <Button variant="outline" size="sm" className="border-muted">
-                  Frontal
-                </Button>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-white">Câmera Padrão</p>
+                <p className="text-sm text-muted-foreground">Traseira</p>
               </div>
+              <Smartphone className="w-5 h-5 text-blue-400" />
             </div>
 
-            <div>
-              <h4 className="font-medium text-white mb-2">Notificações da Jornada</h4>
-              <p className="text-sm text-muted-foreground mb-3">
-                Receber alertas de descanso e fim de jornada.
-              </p>
-              <Button variant="outline" size="sm" className="border-muted">
-                Configurar
-              </Button>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-white">Idioma</p>
+                <p className="text-sm text-muted-foreground">Português (Brasil)</p>
+              </div>
+              <Globe className="w-5 h-5 text-blue-400" />
             </div>
+
+            <Button
+              onClick={onOpenPreferences}
+              variant="outline"
+              className="w-full border-secondary text-white hover:bg-secondary/70 mt-4"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Ver Todas as Configurações
+            </Button>
           </CardContent>
         </Card>
 
-        {/* App Permissions */}
+        {/* App Permissions Preview */}
         <Card className="bg-secondary/30 border-secondary">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-white">
               <Smartphone className="w-5 h-5 text-blue-400" />
-              <span>Permissões do App</span>
+              <span>Status das Permissões</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-white">Câmera</p>
-              </div>
-              <Button variant="outline" size="sm" className="border-muted">
-                Verificar
-              </Button>
+              <span className="font-medium text-white">Câmera</span>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             </div>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-white">Localização</p>
-              </div>
-              <Button variant="outline" size="sm" className="border-muted">
-                Verificar
-              </Button>
+              <span className="font-medium text-white">Localização</span>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             </div>
             <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-white">Notificações</p>
-              </div>
-              <Button variant="outline" size="sm" className="border-muted">
-                Verificar
-              </Button>
+              <span className="font-medium text-white">Notificações</span>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
             </div>
+            
+            <Button
+              onClick={onOpenPreferences}
+              variant="outline"
+              size="sm"
+              className="w-full border-secondary text-white hover:bg-secondary/70 mt-3"
+            >
+              Gerenciar Permissões
+            </Button>
           </CardContent>
         </Card>
       </div>

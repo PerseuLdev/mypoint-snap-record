@@ -6,10 +6,17 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface HomeViewProps {
   onNavigateToRegistrar: () => void;
+  onNavigateToAtestado: () => void;
+  onNavigateToOcorrencia: () => void;
   recordsCount: number;
 }
 
-const HomeView: React.FC<HomeViewProps> = ({ onNavigateToRegistrar, recordsCount }) => {
+const HomeView: React.FC<HomeViewProps> = ({ 
+  onNavigateToRegistrar, 
+  onNavigateToAtestado,
+  onNavigateToOcorrencia,
+  recordsCount 
+}) => {
   return (
     <div className="p-4 space-y-6 pb-24">
       {/* Welcome Section */}
@@ -38,22 +45,36 @@ const HomeView: React.FC<HomeViewProps> = ({ onNavigateToRegistrar, recordsCount
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 gap-4">
         <Card className="bg-secondary/50 border-secondary">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <FileText className="w-6 h-6 text-blue-400" />
-            </div>
-            <h3 className="font-medium text-white mb-1">Atestado Médico</h3>
-            <p className="text-xs text-muted-foreground">Enviar um comprovante</p>
+          <CardContent className="p-4">
+            <Button
+              onClick={onNavigateToAtestado}
+              className="w-full h-full bg-transparent hover:bg-white/10 border-0 text-white"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <FileText className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className="font-medium text-white mb-1">Atestado Médico</h3>
+                <p className="text-xs text-muted-foreground">Enviar um comprovante</p>
+              </div>
+            </Button>
           </CardContent>
         </Card>
 
         <Card className="bg-secondary/50 border-secondary">
-          <CardContent className="p-4 text-center">
-            <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <AlertTriangle className="w-6 h-6 text-orange-400" />
-            </div>
-            <h3 className="font-medium text-white mb-1">Ocorrência</h3>
-            <p className="text-xs text-muted-foreground">Reportar um incidente</p>
+          <CardContent className="p-4">
+            <Button
+              onClick={onNavigateToOcorrencia}
+              className="w-full h-full bg-transparent hover:bg-white/10 border-0 text-white"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <AlertTriangle className="w-6 h-6 text-orange-400" />
+                </div>
+                <h3 className="font-medium text-white mb-1">Ocorrência</h3>
+                <p className="text-xs text-muted-foreground">Reportar um incidente</p>
+              </div>
+            </Button>
           </CardContent>
         </Card>
       </div>
