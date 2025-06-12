@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { TimeRecord } from '@/pages/Index';
+import { TimeRecord } from '@/types';
 
 interface HistoryViewProps {
   records: TimeRecord[];
@@ -63,10 +63,34 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
     });
   };
 
-  const getRecordTypeColor = (type: 'entrada' | 'saida') => {
-    return type === 'entrada' 
-      ? 'bg-green-100 text-green-800 border-green-200'
-      : 'bg-orange-100 text-orange-800 border-orange-200';
+  const getRecordTypeColor = (type: TimeRecord['type']) => {
+    switch (type) {
+      case 'entrada':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pausa_inicio':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pausa_fim':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'saida':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getRecordTypeLabel = (type: TimeRecord['type']) => {
+    switch (type) {
+      case 'entrada':
+        return 'Entrada';
+      case 'pausa_inicio':
+        return 'Início da Pausa';
+      case 'pausa_fim':
+        return 'Fim da Pausa';
+      case 'saida':
+        return 'Saída';
+      default:
+        return 'Registro';
+    }
   };
 
   return (
@@ -201,7 +225,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Tipo:</span>
                   <Badge className={getRecordTypeColor(selectedRecord.type)}>
-                    {selectedRecord.type === 'entrada' ? 'Entrada' : 'Saída'}
+                    {getRecordTypeLabel(selectedRecord.type)}
                   </Badge>
                 </div>
 
@@ -238,6 +262,36 @@ interface RecordCardProps {
 }
 
 const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
+  const getRecordTypeColor = (type: TimeRecord['type']) => {
+    switch (type) {
+      case 'entrada':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'pausa_inicio':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pausa_fim':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'saida':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getRecordTypeLabel = (type: TimeRecord['type']) => {
+    switch (type) {
+      case 'entrada':
+        return 'Entrada';
+      case 'pausa_inicio':
+        return 'Início da Pausa';
+      case 'pausa_fim':
+        return 'Fim da Pausa';
+      case 'saida':
+        return 'Saída';
+      default:
+        return 'Registro';
+    }
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onViewDetails(record)}>
       <CardContent className="p-4">
@@ -254,11 +308,8 @@ const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
           {/* Details */}
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
-              <Badge className={`${record.type === 'entrada' 
-                ? 'bg-green-100 text-green-800 border-green-200' 
-                : 'bg-orange-100 text-orange-800 border-orange-200'
-              }`}>
-                {record.type === 'entrada' ? 'Entrada' : 'Saída'}
+              <Badge className={getRecordTypeColor(record.type)}>
+                {getRecordTypeLabel(record.type)}
               </Badge>
               <span className="text-lg font-bold text-gray-800">
                 {new Date(record.timestamp).toLocaleTimeString('pt-BR', {
