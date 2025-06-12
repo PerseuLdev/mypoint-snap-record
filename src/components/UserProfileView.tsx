@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, Settings, Sun, Moon, Smartphone, Globe, ArrowLeft } from 'lucide-react';
+import { User, Settings, Sun, Moon, Smartphone, Globe, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
