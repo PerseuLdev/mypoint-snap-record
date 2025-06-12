@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Clock, Plus, Edit, Trash2, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -59,7 +58,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
     setFormData({
       name: alarm.name,
       time: alarm.time,
-      days: alarm.days,
+      days: alarm.days || [],
       enabled: alarm.enabled
     });
     setEditingAlarm(alarm);
@@ -102,10 +101,10 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
     }));
   };
 
-  const formatDays = (days: string[]) => {
+  const formatDays = (days: string[] | undefined | null) => {
+    if (!days || days.length === 0) return 'Nenhum dia';
     if (days.length === 7) return 'Todos os dias';
-    if (days.length === 0) return 'Nenhum dia';
-    return days.map(day => weekDays.find(wd => wd.key === day)?.label).join(', ');
+    return days.map(day => weekDays.find(wd => wd.key === day)?.label).filter(Boolean).join(', ');
   };
 
   return (
