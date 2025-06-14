@@ -374,6 +374,20 @@ const Index = () => {
     });
   };
 
+  const handleClearHistory = () => {
+    setTimeRecords([]);
+    setAttestadoRecords([]);
+    setOcorrenciaRecords([]);
+    localStorage.removeItem('mypoint-time-records');
+    localStorage.removeItem('mypoint-attestado-records');
+    localStorage.removeItem('mypoint-ocorrencia-records');
+    
+    toast({
+      title: "Histórico limpo!",
+      description: "Todos os registros foram removidos.",
+    });
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'welcome':
@@ -430,7 +444,6 @@ const Index = () => {
         return (
           <CalendarFilterView
             onBack={() => setCurrentView('advanced-history')}
-            timeRecords={timeRecords.filter(record => !record.deleted)}
           />
         );
         
@@ -473,6 +486,8 @@ const Index = () => {
         return (
           <ProfileView
             onBack={() => setCurrentView('user-profile')}
+            onClearHistory={handleClearHistory}
+            recordsCount={timeRecords.length}
           />
         );
         

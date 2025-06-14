@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface ProfileViewProps {
+  onBack: () => void;
   onClearHistory: () => void;
   recordsCount: number;
-  onBack: () => void;
 }
 
 const ProfileView: React.FC<ProfileViewProps> = ({
+  onBack,
   onClearHistory,
-  recordsCount,
-  onBack
+  recordsCount
 }) => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
