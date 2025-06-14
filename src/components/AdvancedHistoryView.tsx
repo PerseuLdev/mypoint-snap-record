@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, Filter, Trash2, Download, ArrowLeft, MoreHorizontal, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,28 +7,23 @@ import { Badge } from '@/components/ui/badge';
 import { TimeRecord } from '@/types';
 
 interface AdvancedHistoryViewProps {
-  records: TimeRecord[];
   onBack: () => void;
-  onDeleteRecord: (id: string) => void;
-  onOpenTrash: () => void;
-  onOpenCalendar: () => void;
-  selectedDate?: Date;
+  onCalendarFilter: () => void;
+  timeRecords: TimeRecord[];
 }
 
 const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({ 
-  records, 
   onBack, 
-  onDeleteRecord,
-  onOpenTrash,
-  onOpenCalendar,
-  selectedDate
+  onCalendarFilter,
+  timeRecords
 }) => {
   const [selectedRecords, setSelectedRecords] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const today = new Date().toLocaleDateString('pt-BR');
 
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = timeRecords.filter(record => {
     const matchesSearch = !searchTerm || 
       record.location.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       new Date(record.timestamp).toLocaleDateString('pt-BR').includes(searchTerm);
@@ -46,11 +40,6 @@ const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({
         ? prev.filter(rid => rid !== id)
         : [...prev, id]
     );
-  };
-
-  const handleBulkDelete = () => {
-    selectedRecords.forEach(id => onDeleteRecord(id));
-    setSelectedRecords([]);
   };
 
   const getRecordTypeColor = (type: TimeRecord['type']) => {
@@ -96,14 +85,6 @@ const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({
               <p className="text-xs text-muted-foreground">Olá, Perseu</p>
             </div>
           </div>
-          <div className="ml-auto flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={onOpenTrash}>
-              <Trash2 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <MoreHorizontal className="w-4 h-4" />
-            </Button>
-          </div>
         </div>
       </header>
 
@@ -112,25 +93,10 @@ const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({
           <h2 className="text-2xl font-bold text-white mb-2">Histórico de Registros</h2>
         </div>
 
-        {/* Search */}
-        <Card className="bg-secondary/30 border-secondary">
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por data ou local..."
-                className="pl-10 bg-background border-border text-white"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Filter Actions */}
         <div className="flex space-x-2">
           <Button 
-            onClick={onOpenCalendar}
+            onClick={onCalendarFilter}
             variant="outline" 
             className="flex-1 bg-background border-border text-white hover:bg-secondary"
           >
@@ -144,27 +110,6 @@ const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({
             <Filter className="w-4 h-4" />
           </Button>
         </div>
-
-        {/* Bulk Actions */}
-        {selectedRecords.length > 0 && (
-          <Card className="bg-red-600/20 border-red-600/30">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-red-200">
-                  {selectedRecords.length} {selectedRecords.length === 1 ? 'registro selecionado' : 'registros selecionados'}
-                </p>
-                <Button
-                  onClick={handleBulkDelete}
-                  size="sm"
-                  variant="destructive"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Excluir
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Records Summary */}
         <Card className="bg-blue-600/20 border-blue-600/30">
@@ -234,15 +179,6 @@ const AdvancedHistoryView: React.FC<AdvancedHistoryViewProps> = ({
                         📍 {record.location.address || 'Localização registrada'}
                       </p>
                     </div>
-
-                    <Button
-                      onClick={() => onDeleteRecord(record.id)}
-                      size="sm"
-                      variant="outline"
-                      className="border-red-600 text-red-400 hover:bg-red-600/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

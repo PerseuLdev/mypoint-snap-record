@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, ArrowLeft, AlertTriangle, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,10 +9,11 @@ import { OcorrenciaRecord } from '@/types';
 
 interface OcorrenciaViewProps {
   onBack: () => void;
-  onSave: (ocorrencia: Omit<OcorrenciaRecord, 'id'>) => void;
+  onCreateOcorrencia: (ocorrencia: Omit<OcorrenciaRecord, 'id' | 'timestamp'>) => void;
+  ocorrenciaRecords: OcorrenciaRecord[];
 }
 
-const OcorrenciaView: React.FC<OcorrenciaViewProps> = ({ onBack, onSave }) => {
+const OcorrenciaView: React.FC<OcorrenciaViewProps> = ({ onBack, onCreateOcorrencia, ocorrenciaRecords }) => {
   const [photo, setPhoto] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -132,8 +132,7 @@ const OcorrenciaView: React.FC<OcorrenciaViewProps> = ({ onBack, onSave }) => {
       return;
     }
 
-    onSave({
-      timestamp: new Date().toISOString(),
+    onCreateOcorrencia({
       photo,
       description,
       location

@@ -7,19 +7,16 @@ import { Calendar } from '@/components/ui/calendar';
 
 interface CalendarFilterViewProps {
   onBack: () => void;
-  selectedDate: Date | undefined;
-  onDateSelect: (date: Date | undefined) => void;
 }
 
 const CalendarFilterView: React.FC<CalendarFilterViewProps> = ({
-  onBack,
-  selectedDate,
-  onDateSelect
+  onBack
 }) => {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const handleDateSelect = (date: Date | undefined) => {
-    onDateSelect(date);
+    setSelectedDate(date);
     onBack();
   };
 

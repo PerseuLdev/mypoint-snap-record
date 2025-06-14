@@ -3,20 +3,32 @@ import React from 'react';
 import { Clock, Camera, FileText, AlertTriangle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ViewType } from '../pages/Index';
+import { TimeRecord, ShiftType } from '@/types';
 
 interface HomeViewProps {
-  onNavigateToRegistrar: () => void;
-  onNavigateToAtestado: () => void;
-  onNavigateToOcorrencia: () => void;
-  recordsCount: number;
+  onNavigate: (view: ViewType) => void;
+  timeRecords: TimeRecord[];
+  currentTime: Date;
+  locationStatus: 'loading' | 'success' | 'error';
+  shiftTypes: ShiftType[];
+  activeShiftType?: ShiftType;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({ 
-  onNavigateToRegistrar, 
-  onNavigateToAtestado,
-  onNavigateToOcorrencia,
-  recordsCount 
+  onNavigate, 
+  timeRecords,
+  currentTime,
+  locationStatus,
+  shiftTypes,
+  activeShiftType
 }) => {
+  // Get today's records count
+  const today = new Date().toDateString();
+  const todayRecords = timeRecords.filter(record => 
+    new Date(record.timestamp).toDateString() === today && !record.deleted
+  );
+
   return (
     <div className="p-4 space-y-6 pb-24">
       {/* Welcome Section */}
@@ -29,7 +41,7 @@ const HomeView: React.FC<HomeViewProps> = ({
       <Card className="bg-gradient-to-r from-blue-600 to-blue-700 border-0">
         <CardContent className="p-6">
           <Button
-            onClick={onNavigateToRegistrar}
+            onClick={() => onNavigate('registration')}
             className="w-full h-16 bg-white/20 hover:bg-white/30 text-white border-0 text-lg font-semibold"
           >
             <Camera className="w-6 h-6 mr-3" />
@@ -47,7 +59,7 @@ const HomeView: React.FC<HomeViewProps> = ({
         <Card className="bg-secondary/50 border-secondary">
           <CardContent className="p-4">
             <Button
-              onClick={onNavigateToAtestado}
+              onClick={() => onNavigate('attestado')}
               className="w-full h-full bg-transparent hover:bg-white/10 border-0 text-white"
             >
               <div className="text-center">
@@ -64,7 +76,7 @@ const HomeView: React.FC<HomeViewProps> = ({
         <Card className="bg-secondary/50 border-secondary">
           <CardContent className="p-4">
             <Button
-              onClick={onNavigateToOcorrencia}
+              onClick={() => onNavigate('ocorrencia')}
               className="w-full h-full bg-transparent hover:bg-white/10 border-0 text-white"
             >
               <div className="text-center">
@@ -86,7 +98,7 @@ const HomeView: React.FC<HomeViewProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Registros hoje</p>
-                <p className="text-2xl font-bold text-white">{recordsCount}</p>
+                <p className="text-2xl font-bold text-white">{todayRecords.length}</p>
               </div>
               <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center">
                 <Clock className="w-6 h-6 text-green-400" />

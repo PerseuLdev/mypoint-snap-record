@@ -9,22 +9,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { TimeRecord } from '@/types';
 
 interface HistoryViewProps {
-  records: TimeRecord[];
-  onClearHistory: () => void;
+  onBack: () => void;
+  onAdvancedView: () => void;
+  onDeleteRecord: (id: string) => void;
+  timeRecords: TimeRecord[];
 }
 
-const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) => {
+const HistoryView: React.FC<HistoryViewProps> = ({ 
+  onBack,
+  onAdvancedView,
+  onDeleteRecord,
+  timeRecords
+}) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedRecord, setSelectedRecord] = useState<TimeRecord | null>(null);
 
   // Filter records by selected date
   const filteredRecords = selectedDate 
-    ? records.filter(record => {
+    ? timeRecords.filter(record => {
         const recordDate = new Date(record.timestamp).toDateString();
         const filterDate = new Date(selectedDate).toDateString();
         return recordDate === filterDate;
       })
-    : records;
+    : timeRecords;
 
   // Group records by date
   const groupedRecords = filteredRecords.reduce((groups, record) => {
@@ -97,38 +104,40 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
     <div className="p-4 space-y-4 pb-24">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-gray-800">Histórico</h2>
-          <p className="text-sm text-gray-600">
-            {records.length} {records.length === 1 ? 'registro' : 'registros'} total
-          </p>
+        <div className="flex items-center space-x-3">
+          <Button variant="ghost" size="sm" onClick={onBack}>
+            <Clock className="w-4 h-4" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold text-white">Histórico</h2>
+            <p className="text-sm text-muted-foreground">
+              {timeRecords.length} {timeRecords.length === 1 ? 'registro' : 'registros'} total
+            </p>
+          </div>
         </div>
         
-        {records.length > 0 && (
-          <Button
-            onClick={onClearHistory}
-            variant="outline"
-            size="sm"
-            className="text-red-600 border-red-200 hover:bg-red-50"
-          >
-            <Trash2 className="w-4 h-4 mr-1" />
-            Limpar
-          </Button>
-        )}
+        <Button
+          onClick={onAdvancedView}
+          variant="outline"
+          size="sm"
+          className="border-secondary text-white"
+        >
+          Avançado
+        </Button>
       </div>
 
       {/* Date Filter */}
-      {records.length > 0 && (
-        <Card>
+      {timeRecords.length > 0 && (
+        <Card className="bg-secondary/30 border-secondary">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <Filter className="w-5 h-5 text-gray-600" />
+              <Filter className="w-5 h-5 text-muted-foreground" />
               <div className="flex-1">
                 <Input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full"
+                  className="w-full bg-background border-border text-white"
                   placeholder="Filtrar por data"
                 />
               </div>
@@ -137,7 +146,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
                   onClick={() => setSelectedDate('')}
                   variant="ghost"
                   size="sm"
-                  className="text-gray-600"
+                  className="text-muted-foreground"
                 >
                   Limpar
                 </Button>
@@ -149,14 +158,14 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
 
       {/* Records List */}
       {Object.keys(groupedRecords).length === 0 ? (
-        <Card className="text-center py-12">
-          <CardContent>
-            <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-600 mb-2">
-              {records.length === 0 ? 'Nenhum registro ainda' : 'Nenhum registro para esta data'}
+        <Card className="bg-secondary/30 border-secondary">
+          <CardContent className="text-center py-12">
+            <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">
+              {timeRecords.length === 0 ? 'Nenhum registro ainda' : 'Nenhum registro para esta data'}
             </h3>
-            <p className="text-gray-500">
-              {records.length === 0 
+            <p className="text-muted-foreground">
+              {timeRecords.length === 0 
                 ? 'Registre seu primeiro ponto para começar!'
                 : 'Tente selecionar uma data diferente.'
               }
@@ -171,8 +180,8 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
               <div key={date} className="space-y-3">
                 {/* Date Header */}
                 <div className="flex items-center space-x-2">
-                  <Calendar className="w-4 h-4 text-gray-600" />
-                  <h3 className="font-medium text-gray-800 capitalize">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="font-medium text-white capitalize">
                     {formatDate(date)}
                   </h3>
                   <Badge variant="secondary">
@@ -189,6 +198,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
                         key={record.id}
                         record={record}
                         onViewDetails={(record) => setSelectedRecord(record)}
+                        onDelete={onDeleteRecord}
                       />
                     ))
                   }
@@ -201,9 +211,9 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
 
       {/* Record Details Modal */}
       <Dialog open={!!selectedRecord} onOpenChange={() => setSelectedRecord(null)}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-secondary border-secondary">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center space-x-2 text-white">
               <Clock className="w-5 h-5" />
               <span>Detalhes do Registro</span>
             </DialogTitle>
@@ -212,7 +222,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
           {selectedRecord && (
             <div className="space-y-4">
               {/* Photo */}
-              <div className="aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden">
+              <div className="aspect-[4/3] bg-gray-700 rounded-lg overflow-hidden">
                 <img 
                   src={selectedRecord.photo} 
                   alt="Registro de ponto"
@@ -223,26 +233,26 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
               {/* Details */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Tipo:</span>
+                  <span className="text-sm text-muted-foreground">Tipo:</span>
                   <Badge className={getRecordTypeColor(selectedRecord.type)}>
                     {getRecordTypeLabel(selectedRecord.type)}
                   </Badge>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Data e Hora:</span>
-                  <span className="font-medium">
+                  <span className="text-sm text-muted-foreground">Data e Hora:</span>
+                  <span className="font-medium text-white">
                     {new Date(selectedRecord.timestamp).toLocaleString('pt-BR')}
                   </span>
                 </div>
 
                 <div className="flex items-start justify-between">
-                  <span className="text-sm text-gray-600">Localização:</span>
+                  <span className="text-sm text-muted-foreground">Localização:</span>
                   <div className="text-right">
-                    <p className="font-medium text-sm">
+                    <p className="font-medium text-sm text-white">
                       {selectedRecord.location.address || 'Endereço não disponível'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {selectedRecord.location.latitude.toFixed(6)}, {selectedRecord.location.longitude.toFixed(6)}
                     </p>
                   </div>
@@ -259,9 +269,10 @@ const HistoryView: React.FC<HistoryViewProps> = ({ records, onClearHistory }) =>
 interface RecordCardProps {
   record: TimeRecord;
   onViewDetails: (record: TimeRecord) => void;
+  onDelete: (id: string) => void;
 }
 
-const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
+const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails, onDelete }) => {
   const getRecordTypeColor = (type: TimeRecord['type']) => {
     switch (type) {
       case 'entrada':
@@ -293,11 +304,11 @@ const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onViewDetails(record)}>
+    <Card className="bg-secondary/30 border-secondary hover:bg-secondary/40 transition-colors cursor-pointer" onClick={() => onViewDetails(record)}>
       <CardContent className="p-4">
         <div className="flex items-center space-x-4">
           {/* Photo thumbnail */}
-          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+          <div className="w-16 h-16 bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
             <img 
               src={record.photo} 
               alt="Registro"
@@ -311,7 +322,7 @@ const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
               <Badge className={getRecordTypeColor(record.type)}>
                 {getRecordTypeLabel(record.type)}
               </Badge>
-              <span className="text-lg font-bold text-gray-800">
+              <span className="text-lg font-bold text-white">
                 {new Date(record.timestamp).toLocaleTimeString('pt-BR', {
                   hour: '2-digit',
                   minute: '2-digit'
@@ -319,7 +330,7 @@ const RecordCard: React.FC<RecordCardProps> = ({ record, onViewDetails }) => {
               </span>
             </div>
 
-            <div className="flex items-center space-x-1 text-gray-600">
+            <div className="flex items-center space-x-1 text-muted-foreground">
               <MapPin className="w-3 h-3" />
               <span className="text-xs truncate">
                 {record.location.address || 'Localização registrada'}
