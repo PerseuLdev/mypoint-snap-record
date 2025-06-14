@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, ArrowLeft, Calendar, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,10 @@ import { AttestadoRecord } from '@/types';
 
 interface AttestadoViewProps {
   onBack: () => void;
-  onCreateAttestado: (attestado: Omit<AttestadoRecord, 'id' | 'timestamp'>) => void;
-  attestadoRecords: AttestadoRecord[];
+  onSave: (atestado: Omit<AttestadoRecord, 'id'>) => void;
 }
 
-const AttestadoView: React.FC<AttestadoViewProps> = ({ onBack, onCreateAttestado, attestadoRecords }) => {
+const AttestadoView: React.FC<AttestadoViewProps> = ({ onBack, onSave }) => {
   const [photo, setPhoto] = useState<string | null>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -106,7 +106,8 @@ const AttestadoView: React.FC<AttestadoViewProps> = ({ onBack, onCreateAttestado
       return;
     }
 
-    onCreateAttestado({
+    onSave({
+      timestamp: new Date().toISOString(),
       photo,
       startDate,
       endDate,
@@ -283,23 +284,9 @@ const AttestadoView: React.FC<AttestadoViewProps> = ({ onBack, onCreateAttestado
             <CardTitle className="text-white">Histórico de Envios</CardTitle>
           </CardHeader>
           <CardContent>
-            {attestadoRecords.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Nenhum atestado enviado.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {attestadoRecords.map((record) => (
-                  <div key={record.id} className="p-3 bg-background rounded-lg">
-                    <p className="text-white font-medium">{record.description}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(record.startDate).toLocaleDateString('pt-BR')}
-                      {record.endDate && ` - ${new Date(record.endDate).toLocaleDateString('pt-BR')}`}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Nenhum atestado enviado.</p>
+            </div>
           </CardContent>
         </Card>
       </div>

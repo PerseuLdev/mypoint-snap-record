@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface WelcomeScreenProps {
-  onComplete: () => void;
+  onPermissionsGranted: () => void;
 }
 
-const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPermissionsGranted }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [permissions, setPermissions] = useState({
     camera: false,
@@ -81,7 +81,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else if (allPermissionsGranted) {
-      onComplete();
+      onPermissionsGranted();
     }
   };
 
@@ -89,7 +89,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onComplete }) => {
     // Simulate granting all permissions for demo
     setPermissions({ camera: true, location: true, storage: true });
     setTimeout(() => {
-      onComplete();
+      onPermissionsGranted();
     }, 500);
   };
 

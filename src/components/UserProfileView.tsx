@@ -3,16 +3,13 @@ import React from 'react';
 import { User, Settings, Sun, Moon, Smartphone, Globe, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ViewType } from '../pages/Index';
-import BottomNavigation from './BottomNavigation';
 
 interface UserProfileViewProps {
   onBack: () => void;
-  onProfile: () => void;
-  onNavigate: (view: ViewType) => void;
+  onOpenPreferences: () => void;
 }
 
-const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, onNavigate }) => {
+const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPreferences }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -37,7 +34,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, on
             <Button variant="ghost" size="sm">
               <Sun className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={onProfile}>
+            <Button variant="ghost" size="sm" onClick={onOpenPreferences}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -114,7 +111,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, on
             </div>
 
             <Button
-              onClick={onProfile}
+              onClick={onOpenPreferences}
               variant="outline"
               className="w-full border-secondary text-white hover:bg-secondary/70 mt-4"
             >
@@ -147,7 +144,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, on
             </div>
             
             <Button
-              onClick={onProfile}
+              onClick={onOpenPreferences}
               variant="outline"
               size="sm"
               className="w-full border-secondary text-white hover:bg-secondary/70 mt-3"
@@ -157,9 +154,6 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, on
           </CardContent>
         </Card>
       </div>
-
-      {/* Bottom Navigation */}
-      <BottomNavigation currentView="user-profile" onNavigate={onNavigate} />
     </div>
   );
 };

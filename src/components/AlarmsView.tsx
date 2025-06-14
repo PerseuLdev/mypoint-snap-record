@@ -12,7 +12,7 @@ import { Alarm } from '@/types';
 interface AlarmsViewProps {
   onBack: () => void;
   alarms: Alarm[];
-  onCreateAlarm: (alarm: Omit<Alarm, 'id'>) => void;
+  onSaveAlarm: (alarm: Omit<Alarm, 'id'>) => void;
   onUpdateAlarm: (id: string, alarm: Partial<Alarm>) => void;
   onDeleteAlarm: (id: string) => void;
 }
@@ -20,7 +20,7 @@ interface AlarmsViewProps {
 const AlarmsView: React.FC<AlarmsViewProps> = ({
   onBack,
   alarms,
-  onCreateAlarm,
+  onSaveAlarm,
   onUpdateAlarm,
   onDeleteAlarm
 }) => {
@@ -66,10 +66,10 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
   };
 
   const handleSave = () => {
-    if (!formData.time) {
+    if (!formData.name || !formData.time) {
       toast({
-        title: "Campo obrigatório",
-        description: "Preencha o horário do alarme.",
+        title: "Campos obrigatórios",
+        description: "Preencha o nome e horário do alarme.",
       });
       return;
     }
@@ -81,7 +81,7 @@ const AlarmsView: React.FC<AlarmsViewProps> = ({
         description: "As alterações foram salvas com sucesso.",
       });
     } else {
-      onCreateAlarm(formData);
+      onSaveAlarm(formData);
       toast({
         title: "Alarme criado!",
         description: "Novo alarme foi criado com sucesso.",

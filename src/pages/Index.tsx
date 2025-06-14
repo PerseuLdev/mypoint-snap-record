@@ -20,6 +20,7 @@ import AttestadoView from '../components/AttestadoView';
 import OcorrenciaView from '../components/OcorrenciaView';
 import WelcomeScreen from '../components/WelcomeScreen';
 import { TimeRecord, ShiftType, AttestadoRecord, OcorrenciaRecord, Alarm } from '@/types';
+import { useWorkdayReminder } from '@/hooks/useWorkdayReminder';
 import { useToast } from '@/hooks/use-toast';
 
 const queryClient = new QueryClient();
@@ -135,8 +136,7 @@ const Index = () => {
     loadData();
   }, []);
 
-  // Temporarily commenting out until we fix the type mismatch
-  // useWorkdayReminder(timeRecords);
+  useWorkdayReminder(timeRecords);
 
   const getActiveShiftType = (): ShiftType | undefined => {
     const today = new Date().toDateString();
@@ -374,20 +374,6 @@ const Index = () => {
     });
   };
 
-  const handleClearHistory = () => {
-    setTimeRecords([]);
-    setAttestadoRecords([]);
-    setOcorrenciaRecords([]);
-    localStorage.removeItem('mypoint-time-records');
-    localStorage.removeItem('mypoint-attestado-records');
-    localStorage.removeItem('mypoint-ocorrencia-records');
-    
-    toast({
-      title: "Histórico limpo!",
-      description: "Todos os registros foram removidos.",
-    });
-  };
-
   const renderCurrentView = () => {
     switch (currentView) {
       case 'welcome':
@@ -444,6 +430,7 @@ const Index = () => {
         return (
           <CalendarFilterView
             onBack={() => setCurrentView('advanced-history')}
+            timeRecords={timeRecords.filter(record => !record.deleted)}
           />
         );
         
@@ -451,12 +438,8 @@ const Index = () => {
         return (
           <TrashView
             onBack={() => setCurrentView('home')}
-            onRestore={handleRestoreRecord}
+            onRestoreRecord={handleRestoreRecord}
             onPermanentDelete={handlePermanentDelete}
-            onEmptyTrash={() => {
-              const deletedIds = timeRecords.filter(r => r.deleted).map(r => r.id);
-              deletedIds.forEach(id => handlePermanentDelete(id));
-            }}
             deletedRecords={timeRecords.filter(record => record.deleted)}
           />
         );
@@ -483,7 +466,6 @@ const Index = () => {
           <UserProfileView
             onBack={() => setCurrentView('settings')}
             onProfile={() => setCurrentView('profile')}
-            onNavigate={setCurrentView}
           />
         );
         
@@ -491,8 +473,6 @@ const Index = () => {
         return (
           <ProfileView
             onBack={() => setCurrentView('user-profile')}
-            onClearHistory={handleClearHistory}
-            recordsCount={timeRecords.length}
           />
         );
         
@@ -511,7 +491,7 @@ const Index = () => {
           <ShiftTypeManagementView
             onBack={() => setCurrentView('shift-types')}
             shiftTypes={shiftTypes}
-            onSaveShiftType={handleCreateShiftType}
+            onCreateShiftType={handleCreateShiftType}
             onUpdateShiftType={handleUpdateShiftType}
             onDeleteShiftType={handleDeleteShiftType}
           />
