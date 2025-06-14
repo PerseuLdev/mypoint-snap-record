@@ -20,7 +20,6 @@ import AttestadoView from '../components/AttestadoView';
 import OcorrenciaView from '../components/OcorrenciaView';
 import WelcomeScreen from '../components/WelcomeScreen';
 import { TimeRecord, ShiftType, AttestadoRecord, OcorrenciaRecord, Alarm } from '@/types';
-import { useWorkdayReminder } from '@/hooks/useWorkdayReminder';
 import { useToast } from '@/hooks/use-toast';
 
 const queryClient = new QueryClient();
@@ -136,7 +135,8 @@ const Index = () => {
     loadData();
   }, []);
 
-  useWorkdayReminder(timeRecords);
+  // Temporarily commenting out until we fix the type mismatch
+  // useWorkdayReminder(timeRecords);
 
   const getActiveShiftType = (): ShiftType | undefined => {
     const today = new Date().toDateString();
@@ -451,8 +451,12 @@ const Index = () => {
         return (
           <TrashView
             onBack={() => setCurrentView('home')}
-            onRestoreRecord={handleRestoreRecord}
+            onRestore={handleRestoreRecord}
             onPermanentDelete={handlePermanentDelete}
+            onEmptyTrash={() => {
+              const deletedIds = timeRecords.filter(r => r.deleted).map(r => r.id);
+              deletedIds.forEach(id => handlePermanentDelete(id));
+            }}
             deletedRecords={timeRecords.filter(record => record.deleted)}
           />
         );
@@ -506,7 +510,7 @@ const Index = () => {
           <ShiftTypeManagementView
             onBack={() => setCurrentView('shift-types')}
             shiftTypes={shiftTypes}
-            onCreateShiftType={handleCreateShiftType}
+            onSaveShiftType={handleCreateShiftType}
             onUpdateShiftType={handleUpdateShiftType}
             onDeleteShiftType={handleDeleteShiftType}
           />

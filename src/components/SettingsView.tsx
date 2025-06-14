@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Settings, Trash2, Shield, Info } from 'lucide-react';
+import { Settings, Trash2, Shield, Info, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -9,21 +9,16 @@ import AlarmSettings from './AlarmSettings';
 import WorkdaySettings from './WorkdaySettings';
 
 interface SettingsViewProps {
-  onClearHistory: () => void;
-  recordsCount: number;
+  onBack: () => void;
+  onAdvancedPreferences: () => void;
+  onUserProfile: () => void;
 }
 
 const SettingsView: React.FC<SettingsViewProps> = ({
-  onClearHistory,
-  recordsCount
+  onBack,
+  onAdvancedPreferences,
+  onUserProfile
 }) => {
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
-
-  const handleClearHistory = () => {
-    onClearHistory();
-    setShowClearConfirm(false);
-  };
-
   const requestPermissions = async () => {
     // Simulate permission request
     alert('Verificando permissões...\n\n✅ Câmera: Concedida\n✅ Localização: Concedida\n✅ Armazenamento: Concedido');
@@ -31,9 +26,43 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
   return (
     <div className="p-4 space-y-4 pb-24">
-      <div className="flex items-center space-x-2 mb-6">
-        <Settings className="w-6 h-6 text-blue-700" />
-        <h2 className="text-xl font-bold text-gray-800">Configurações</h2>
+      <div className="flex items-center space-x-3 mb-6">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <Settings className="w-6 h-6 text-indigo-600" />
+        <h2 className="text-xl font-bold text-slate-800">Configurações</h2>
+      </div>
+
+      {/* Navigation Cards */}
+      <div className="space-y-3">
+        <Card className="cursor-pointer hover:bg-secondary/40 transition-colors" onClick={onAdvancedPreferences}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-white">Preferências Avançadas</h3>
+                <p className="text-sm text-muted-foreground">Tema, idioma e configurações do app</p>
+              </div>
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 rotate-180" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="cursor-pointer hover:bg-secondary/40 transition-colors" onClick={onUserProfile}>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-white">Perfil do Usuário</h3>
+                <p className="text-sm text-muted-foreground">Informações pessoais e conta</p>
+              </div>
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 rotate-180" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Workday and Alarm Settings Tabs */}
@@ -64,7 +93,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Status das Permissões</p>
-              <p className="text-sm text-gray-600">Verificar e solicitar permissões necessárias</p>
+              <p className="text-sm text-slate-600">Verificar e solicitar permissões necessárias</p>
             </div>
             <Button variant="outline" onClick={requestPermissions}>
               Verificar
@@ -74,72 +103,17 @@ const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="space-y-2 pt-2 border-t">
             <div className="flex items-center justify-between">
               <span className="text-sm">Câmera</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativa</Badge>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Ativa</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Localização</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativa</Badge>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Ativa</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Armazenamento</span>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">Ativo</Badge>
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">Ativo</Badge>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Data Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Trash2 className="w-5 h-5" />
-            <span>Gerenciar Dados</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Histórico de Registros</p>
-              <p className="text-sm text-gray-600">
-                {recordsCount > 0 
-                  ? `${recordsCount} registro${recordsCount !== 1 ? 's' : ''} armazenado${recordsCount !== 1 ? 's' : ''} localmente`
-                  : 'Nenhum registro encontrado'
-                }
-              </p>
-            </div>
-            {recordsCount > 0 && (
-              <Button 
-                variant="destructive" 
-                onClick={() => setShowClearConfirm(true)}
-              >
-                Limpar
-              </Button>
-            )}
-          </div>
-
-          {showClearConfirm && (
-            <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-              <p className="text-sm text-red-800 mb-3">
-                Tem certeza que deseja limpar todo o histórico? Esta ação não pode ser desfeita.
-              </p>
-              <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="destructive" 
-                  onClick={handleClearHistory}
-                >
-                  Confirmar
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={() => setShowClearConfirm(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -154,7 +128,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
         <CardContent className="space-y-3">
           <div>
             <p className="font-medium">MyPoint v1.0.0</p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-600">
               Registre seu ponto de forma segura com foto, timestamp e geolocalização.
             </p>
           </div>
@@ -162,30 +136,30 @@ const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="pt-2 border-t space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm">Armazenamento</span>
-              <span className="text-sm text-gray-600">Local</span>
+              <span className="text-sm text-slate-600">Local</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Câmera</span>
-              <span className="text-sm text-gray-600">Traseira</span>
+              <span className="text-sm text-slate-600">Traseira</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm">Backup</span>
-              <span className="text-sm text-gray-600">Manual</span>
+              <span className="text-sm text-slate-600">Manual</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Privacy Notice */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-indigo-50 border-indigo-200">
         <CardContent className="p-4">
           <div className="flex items-start space-x-3">
-            <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+            <Shield className="w-5 h-5 text-indigo-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-blue-800">
+              <p className="text-sm font-medium text-indigo-800">
                 Privacidade e Segurança
               </p>
-              <p className="text-xs text-blue-600 mt-1">
+              <p className="text-xs text-indigo-600 mt-1">
                 Todos os seus dados são armazenados localmente no seu dispositivo. 
                 Nenhuma informação é enviada para servidores externos.
               </p>

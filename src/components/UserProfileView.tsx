@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface UserProfileViewProps {
   onBack: () => void;
-  onOpenPreferences: () => void;
+  onProfile: () => void;
 }
 
-const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPreferences }) => {
+const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -34,7 +34,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPrefere
             <Button variant="ghost" size="sm">
               <Sun className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={onOpenPreferences}>
+            <Button variant="ghost" size="sm" onClick={onProfile}>
               <Settings className="w-4 h-4" />
             </Button>
           </div>
@@ -111,7 +111,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPrefere
             </div>
 
             <Button
-              onClick={onOpenPreferences}
+              onClick={onProfile}
               variant="outline"
               className="w-full border-secondary text-white hover:bg-secondary/70 mt-4"
             >
@@ -144,7 +144,7 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onOpenPrefere
             </div>
             
             <Button
-              onClick={onOpenPreferences}
+              onClick={onProfile}
               variant="outline"
               size="sm"
               className="w-full border-secondary text-white hover:bg-secondary/70 mt-3"
