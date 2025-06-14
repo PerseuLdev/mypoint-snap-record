@@ -3,13 +3,16 @@ import React from 'react';
 import { User, Settings, Sun, Moon, Smartphone, Globe, ArrowLeft, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ViewType } from '../pages/Index';
+import BottomNavigation from './BottomNavigation';
 
 interface UserProfileViewProps {
   onBack: () => void;
   onProfile: () => void;
+  onNavigate: (view: ViewType) => void;
 }
 
-const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile }) => {
+const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile, onNavigate }) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -154,6 +157,9 @@ const UserProfileView: React.FC<UserProfileViewProps> = ({ onBack, onProfile }) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNavigation currentView="user-profile" onNavigate={onNavigate} />
     </div>
   );
 };

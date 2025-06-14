@@ -483,6 +483,7 @@ const Index = () => {
           <UserProfileView
             onBack={() => setCurrentView('settings')}
             onProfile={() => setCurrentView('profile')}
+            onNavigate={setCurrentView}
           />
         );
         
